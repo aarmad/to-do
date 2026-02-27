@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neo-List | Quoi de neuf ?</title>
+    <!-- Favicon SVG -->
+    <link rel="icon" type="image/svg+xml"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'><circle cx='12' cy='12' r='10' stroke='white' stroke-width='2'/><path d='M9 12l2 2 4-4' stroke='white' stroke-width='2' fill='none' stroke-linecap='round'/></svg>">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <main class="dashboard-grid">
+            <!-- Left Column: Content -->
+            <div class="main-content">
+                <section class="hero-section">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <h1 class="hero-title">
+                            Quoi de
+                            <svg class="star-svg" width="50" height="50" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2l2.4 7.4h7.6l-6.2 4.5 2.4 7.4-6.2-4.5-6.2 4.5 2.4-7.4-6.2-4.5h7.6z" />
+                            </svg><br>
+                            neuf aujourd'hui !
+                        </h1>
+                        <button id="themeToggle" class="pill-button" title="Changer de mode">
+                            <svg id="themeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </section>
+
+                <div class="task-list-card">
+                    <div class="list-header-top">
+                        <div class="search-container-neo">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            </svg>
+                            <input type="text" id="searchInput" placeholder="Rechercher..." class="search-input-neo">
+                        </div>
+                        <div class="filters">
+                            <button class="filter-btn active" data-filter="all">Toutes</button>
+                            <button class="filter-btn" data-filter="active">En cours</button>
+                            <button class="filter-btn" data-filter="completed">Fini</button>
+                        </div>
+                    </div>
+
+                    <div class="bulk-actions-neo">
+                        <button id="markAllDone" class="action-btn-neo">TOUT FINIR</button>
+                        <button id="clearTasks" class="clear-btn-neo">EFFACER TOUT</button>
+                    </div>
+
+                    <ul class="list-container" id="taskList">
+                        <!-- Tasks will be injected here -->
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Right Column: Sidebar -->
+            <div class="sidebar">
+                <!-- Clock Widget -->
+                <div class="clock-card" id="clock">
+                    <div class="clock-time">--:--</div>
+                    <div class="clock-ampm">--</div>
+                </div>
+
+                <!-- Add Task Widget -->
+                <div class="add-task-card">
+                    <h3>Ajouter</h3>
+                    <p>Définir une nouvelle tâche :</p>
+                    <input type="text" id="taskInput" class="task-input" placeholder="Que faut-il faire ?"
+                        autocomplete="off">
+
+                    <div class="task-options">
+                        <select id="priorityInput" class="select-neo">
+                            <option value="low">Priorité Basse</option>
+                            <option value="medium" selected>Priorité Moyenne</option>
+                            <option value="high">Priorité Haute</option>
+                        </select>
+                        <input type="text" id="tagInput" class="tag-input-neo" placeholder="Tag (ex: Maison)">
+                    </div>
+
+                    <div class="date-option">
+                        <label for="dueDateInput">Échéance :</label>
+                        <input type="date" id="dueDateInput" class="date-input-neo">
+                    </div>
+
+                    <button id="addTaskBtn" class="add-button-neo">AJOUTER À LA LISTE</button>
+                </div>
+
+                <!-- Progress Circle -->
+                <div class="progress-container">
+                    <svg class="circle-svg">
+                        <circle class="circle-bg" cx="80" cy="80" r="70"></circle>
+                        <circle class="circle-progress" id="progressBar" cx="80" cy="80" r="70"></circle>
+                    </svg>
+                    <div class="progress-label" id="progressText">0 élément</div>
+                    <div class="stats-mini" id="statsDetail">
+                        0 en cours • 0 terminées
+                    </div>
+
+                    <div class="data-actions-neo">
+                        <button id="exportBtn" class="mini-btn-neo" title="Exporter JSON">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                        </button>
+                        <button id="importBtn" class="mini-btn-neo" title="Importer JSON">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="17 8 12 3 7 8"></polyline>
+                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                            </svg>
+                        </button>
+                        <input type="file" id="importFile" style="display: none;" accept=".json">
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

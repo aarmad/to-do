@@ -1,0 +1,486 @@
+:root {
+    --bg-color: #ffffff;
+    --text-color: #000000;
+    --card-bg: #ffffff;
+    --card-bg-dark: #000000;
+    --accent-color: #000000;
+    --border-width: 3px;
+    --border-radius: 20px;
+    --pill-radius: 50px;
+    --shadow: 8px 8px 0px #000000;
+    --transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+body.dark-mode {
+    --bg-color: #1a1a1a;
+    --text-color: #ffffff;
+    --card-bg: #222222;
+    --card-bg-dark: #000000;
+    --shadow: 8px 8px 0px #ffffff;
+}
+
+@font-face {
+    font-family: 'Outfit';
+    src: url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap');
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    padding: 40px;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.container {
+    max-width: 1000px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 30px;
+    align-items: start;
+}
+
+/* Columns */
+.main-content {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    position: sticky;
+    top: 40px;
+}
+
+/* Hero Section */
+.hero-title {
+    font-size: 72px;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 30px;
+}
+
+.star-svg {
+    vertical-align: middle;
+    margin-left: 10px;
+}
+
+.pill-button {
+    background: black;
+    color: white;
+    border: 3px solid black;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: 4px 4px 0px var(--text-color);
+}
+
+body.dark-mode .pill-button {
+    background: white;
+    color: black;
+    border-color: white;
+}
+
+/* Widgets Base */
+.clock-card,
+.add-task-card,
+.task-list-card,
+.progress-container {
+    border: var(--border-width) solid var(--text-color);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    background: var(--card-bg);
+}
+
+.clock-card {
+    background: var(--card-bg-dark);
+    color: white;
+    padding: 25px;
+    text-align: center;
+}
+
+.clock-time {
+    font-size: 48px;
+    font-weight: 700;
+}
+
+/* Add Task Widget */
+.add-task-card {
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.task-input,
+.tag-input-neo,
+.date-input-neo {
+    border: none;
+    border-bottom: 3px solid var(--text-color);
+    padding: 10px 0;
+    font-size: 18px;
+    font-weight: 600;
+    background: transparent;
+    color: inherit;
+    outline: none;
+}
+
+.task-options {
+    display: flex;
+    gap: 15px;
+}
+
+.select-neo {
+    flex: 1;
+    border: 3px solid var(--text-color);
+    border-radius: 12px;
+    padding: 10px;
+    font-weight: 600;
+    background: transparent;
+    color: inherit;
+}
+
+.date-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+}
+
+.add-button-neo {
+    background: var(--text-color);
+    color: var(--bg-color);
+    border: none;
+    padding: 15px;
+    border-radius: 15px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.add-button-neo:hover {
+    transform: scale(0.98);
+}
+
+/* Task List Card */
+.task-list-card {
+    background: #111;
+    color: white;
+    padding: 30px;
+}
+
+.list-header-top {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.search-container-neo {
+    display: flex;
+    align-items: center;
+    background: #222;
+    border: 2px solid #444;
+    border-radius: 12px;
+    padding: 10px;
+    gap: 10px;
+}
+
+.search-input-neo {
+    background: transparent;
+    border: none;
+    color: white;
+    font-weight: 600;
+    width: 100%;
+    outline: none;
+}
+
+.filters {
+    display: flex;
+    gap: 10px;
+}
+
+.filter-btn {
+    flex: 1;
+    background: #333;
+    border: none;
+    color: #888;
+    padding: 8px;
+    border-radius: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.filter-btn.active {
+    background: white;
+    color: black;
+}
+
+.bulk-actions-neo {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.action-btn-neo,
+.clear-btn-neo {
+    flex: 1;
+    border: none;
+    padding: 8px;
+    border-radius: 10px;
+    font-weight: 800;
+    font-size: 11px;
+    cursor: pointer;
+}
+
+.action-btn-neo {
+    background: #00C851;
+    color: white;
+}
+
+.clear-btn-neo {
+    background: #ff4444;
+    color: white;
+}
+
+.list-container {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* Clarity for Active vs Completed */
+.task-item {
+    background: #222;
+    padding: 15px;
+    border-radius: 15px;
+    border: 1px solid #333;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    transition: var(--transition);
+    border-left: 6px solid #ffbb33;
+    /* Visual indicator for active */
+}
+
+.task-item:hover {
+    transform: translateX(5px);
+    background: #2a2a2a;
+}
+
+.task-item.completed {
+    opacity: 0.6;
+    background: #1a1a1a;
+    border-left-color: #00C851;
+    /* Visual indicator for completed */
+}
+
+.task-item.completed .task-text {
+    text-decoration: line-through;
+    color: #666;
+}
+
+.custom-checkbox {
+    width: 24px;
+    height: 24px;
+    border: 3px solid white;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.2s;
+}
+
+.task-item.completed .custom-checkbox {
+    background: #00C851;
+    border-color: #00C851;
+}
+
+/* Checkmark SVG styling */
+.checkmark-svg {
+    width: 14px;
+    height: 14px;
+    color: white;
+}
+
+.task-content {
+    flex: 1;
+}
+
+.task-text {
+    font-weight: 700;
+    font-size: 16px;
+    outline: none;
+}
+
+.task-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 5px;
+}
+
+.priority-badge {
+    font-size: 9px;
+    padding: 2px 8px;
+    border-radius: 5px;
+    font-weight: 900;
+}
+
+.priority-high {
+    background: #ff4444;
+    color: white;
+}
+
+.priority-medium {
+    background: #ffbb33;
+    color: black;
+}
+
+.priority-low {
+    background: #00C851;
+    color: white;
+}
+
+.tag-badge {
+    background: #444;
+    color: #ccc;
+    font-size: 9px;
+    padding: 2px 8px;
+    border-radius: 5px;
+    font-weight: 700;
+}
+
+.due-date-badge {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 9px;
+    color: #888;
+}
+
+.delete-btn {
+    background: none;
+    border: none;
+    color: #ff4444;
+    font-size: 24px;
+    font-weight: 300;
+    cursor: pointer;
+    opacity: 0;
+    transition: 0.2s;
+}
+
+.task-item:hover .delete-btn {
+    opacity: 1;
+}
+
+/* Progress & Data Widget */
+.progress-container {
+    padding: 30px 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.circle-svg {
+    width: 160px;
+    height: 160px;
+    transform: rotate(-90deg);
+}
+
+.circle-bg {
+    fill: none;
+    stroke: #eee;
+    stroke-width: 12;
+}
+
+body.dark-mode .circle-bg {
+    stroke: #333;
+}
+
+.circle-progress {
+    fill: none;
+    stroke: var(--text-color);
+    stroke-width: 12;
+    stroke-linecap: round;
+    stroke-dasharray: 440;
+    stroke-dashoffset: 440;
+    transition: stroke-dashoffset 0.6s ease;
+}
+
+.progress-label {
+    background: var(--text-color);
+    color: var(--bg-color);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: 800;
+}
+
+.stats-mini {
+    font-size: 11px;
+    font-weight: 700;
+    color: #666;
+}
+
+.data-actions-neo {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.mini-btn-neo {
+    background: var(--card-bg);
+    border: 2px solid var(--text-color);
+    padding: 5px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.2s;
+    display: flex;
+}
+
+.mini-btn-neo:hover {
+    transform: translateY(-2px);
+    box-shadow: 2px 2px 0px var(--text-color);
+}
+
+@media (max-width: 900px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .hero-title {
+        font-size: 50px;
+    }
+
+    .sidebar {
+        position: static;
+    }
+}
