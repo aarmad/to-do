@@ -152,6 +152,13 @@ body.dark-mode .pill-button {
 .task-options {
     display: flex;
     gap: 15px;
+    align-items: center;
+}
+
+.tag-input-neo {
+    flex: 1;
+    width: 0;
+    min-width: 0;
 }
 
 .select-neo {

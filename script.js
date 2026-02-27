@@ -98,12 +98,20 @@ document.addEventListener('DOMContentLoaded', () => {
         saveAndRender();
     });
 
+    let clearConfirmTimeout;
     clearBtn.addEventListener('click', () => {
-        if (window.confirm('Voulez-vous vraiment tout supprimer ?')) {
+        if (clearBtn.innerText === 'SÛR ?') {
             tasks = [];
             searchQuery = '';
             searchInput.value = '';
             saveAndRender();
+            clearBtn.innerText = 'EFFACER TOUT';
+            clearTimeout(clearConfirmTimeout);
+        } else {
+            clearBtn.innerText = 'SÛR ?';
+            clearConfirmTimeout = setTimeout(() => {
+                clearBtn.innerText = 'EFFACER TOUT';
+            }, 3000);
         }
     });
 
