@@ -501,7 +501,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('clockDate').textContent =
             `${days[now.getDay()]} ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
     }
-    const pad = n => String(n).padStart(2, '0');
+    function pad(n) { return String(n).padStart(2, '0'); }
 
     // ── Toast ─────────────────────────────────────────────────────────────────
     let toastTimeout;
