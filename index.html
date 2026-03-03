@@ -283,6 +283,37 @@
                     </button>
                 </div>
 
+                <!-- Pomodoro Timer -->
+                <div class="pomodoro-card">
+                    <div class="pomo-header">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="3">
+                            <circle cx="12" cy="12" r="10" />
+                            <polyline points="12 6 12 12 16 14" />
+                        </svg>
+                        <span>Focus</span>
+                    </div>
+                    <div class="pomo-timer" id="pomoTimer">25:00</div>
+                    <div class="pomo-controls">
+                        <button id="pomoStart" class="pomo-btn main">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                                <polygon points="5 3 19 12 5 21 5 3" />
+                            </svg>
+                        </button>
+                        <button id="pomoReset" class="pomo-btn">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="3">
+                                <path d="M3 2v6h6" />
+                                <path d="M3 13a9 9 0 1 0 3-7.7L3 8" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="pomo-modes">
+                        <button class="pomo-mode active" data-time="25">Travail</button>
+                        <button class="pomo-mode" data-time="5">Pause</button>
+                    </div>
+                </div>
+
                 <!-- Progress -->
                 <div class="progress-container">
                     <svg class="circle-svg" viewBox="0 0 160 160">

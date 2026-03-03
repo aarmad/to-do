@@ -911,6 +911,104 @@ body.dark-mode .subtask-section {
     opacity: 0.9;
 }
 
+/* ── Pomodoro ── */
+.pomodoro-card {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    background: var(--dark-card);
+    color: white;
+}
+
+.pomo-header {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #666;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.pomo-timer {
+    font-size: 38px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    font-variant-numeric: tabular-nums;
+}
+
+.pomo-controls {
+    display: flex;
+    gap: 10px;
+}
+
+.pomo-btn {
+    background: #333;
+    border: none;
+    color: white;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.2s;
+}
+
+.pomo-btn.main {
+    background: #ff4444;
+    width: 44px;
+    height: 44px;
+}
+
+.pomo-btn:hover {
+    transform: scale(1.1);
+}
+
+.pomo-modes {
+    display: flex;
+    background: #222;
+    padding: 4px;
+    border-radius: 10px;
+    gap: 4px;
+}
+
+.pomo-mode {
+    background: transparent;
+    border: none;
+    color: #666;
+    padding: 4px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 7px;
+    cursor: pointer;
+}
+
+.pomo-mode.active {
+    background: #333;
+    color: white;
+}
+
+/* ── Drag & Drop ── */
+.task-item[draggable="true"] {
+    cursor: grab;
+}
+
+.task-item.dragging {
+    opacity: 0.5;
+    filter: grayscale(1);
+    transform: scale(0.95);
+}
+
+.board-column.drag-over {
+    border-color: #ffbb33;
+    background: #ffbb330a;
+}
+
 /* ── Progress Ring ── */
 .progress-container {
     padding: 24px 16px;
