@@ -1,220 +1,375 @@
 :root {
-    --bg-color: #ffffff;
-    --text-color: #000000;
-    --card-bg: #ffffff;
-    --card-bg-dark: #000000;
-    --accent-color: #000000;
-    --border-width: 3px;
-    --border-radius: 20px;
-    --pill-radius: 50px;
-    --shadow: 8px 8px 0px #000000;
+    --bg: #f5f5f0;
+    --text: #111111;
+    --card: #ffffff;
+    --dark-card: #000000;
+    --border: 3px solid #111;
+    --shadow: 6px 6px 0px #111;
+    --radius: 18px;
+    --accent: #111;
+    --muted: #888;
+    --todo-color: #888;
+    --active-color: #ffbb33;
+    --done-color: #00C851;
     --transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 body.dark-mode {
-    --bg-color: #1a1a1a;
-    --text-color: #ffffff;
-    --card-bg: #222222;
-    --card-bg-dark: #000000;
-    --shadow: 8px 8px 0px #ffffff;
-}
-
-@font-face {
-    font-family: 'Outfit';
-    src: url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap');
+    --bg: #141414;
+    --text: #f0f0f0;
+    --card: #1e1e1e;
+    --dark-card: #000000;
+    --border: 3px solid #333;
+    --shadow: 6px 6px 0px #444;
+    --accent: #f0f0f0;
+    --muted: #666;
 }
 
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
 body {
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    padding: 40px;
+    font-family: 'Outfit', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 36px;
     min-height: 100vh;
     display: flex;
     justify-content: center;
-    transition: background-color 0.3s ease, color 0.3s ease;
+    transition: background 0.3s, color 0.3s;
 }
 
 .container {
-    max-width: 1000px;
+    max-width: 1080px;
     width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 30px;
 }
 
 .dashboard-grid {
     display: grid;
     grid-template-columns: 1fr 300px;
-    gap: 30px;
+    gap: 28px;
     align-items: start;
 }
 
-/* Columns */
 .main-content {
     display: flex;
     flex-direction: column;
-    gap: 30px;
+    gap: 24px;
 }
 
 .sidebar {
     display: flex;
     flex-direction: column;
-    gap: 30px;
+    gap: 24px;
     position: sticky;
-    top: 40px;
+    top: 36px;
 }
 
-/* Hero Section */
+/* ── Hero ── */
+.hero-section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.hero-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
 .hero-title {
-    font-size: 72px;
-    font-weight: 700;
-    line-height: 1;
-    margin-bottom: 30px;
+    font-size: 64px;
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -2px;
 }
 
 .star-svg {
     vertical-align: middle;
-    margin-left: 10px;
+    margin-left: 8px;
+}
+
+.hero-actions {
+    display: flex;
+    gap: 10px;
+    padding-top: 6px;
 }
 
 .pill-button {
-    background: black;
-    color: white;
-    border: 3px solid black;
-    width: 50px;
-    height: 50px;
+    background: var(--text);
+    color: var(--bg);
+    border: var(--border);
+    width: 46px;
+    height: 46px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     transition: var(--transition);
-    box-shadow: 4px 4px 0px var(--text-color);
-}
-
-body.dark-mode .pill-button {
-    background: white;
-    color: black;
-    border-color: white;
-}
-
-/* Widgets Base */
-.clock-card,
-.add-task-card,
-.task-list-card,
-.progress-container {
-    border: var(--border-width) solid var(--text-color);
-    border-radius: var(--border-radius);
     box-shadow: var(--shadow);
-    background: var(--card-bg);
 }
 
+.pill-button:hover {
+    transform: scale(0.95);
+}
+
+/* Stats Bar */
+.stats-bar {
+    display: flex;
+    gap: 12px;
+}
+
+.stat-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 40px;
+    font-size: 12px;
+    font-weight: 700;
+    border: 2px solid transparent;
+}
+
+.stat-todo {
+    background: #88888822;
+    border-color: #888;
+    color: #888;
+}
+
+.stat-active {
+    background: #ffbb3322;
+    border-color: #ffbb33;
+    color: #ffbb33;
+}
+
+.stat-done {
+    background: #00C85122;
+    border-color: #00C851;
+    color: #00C851;
+}
+
+/* ── Shared card style ── */
+.task-list-card,
+.add-task-card,
+.clock-card,
+.progress-container {
+    border: var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    background: var(--card);
+}
+
+/* ── Clock ── */
 .clock-card {
-    background: var(--card-bg-dark);
+    background: var(--dark-card);
     color: white;
-    padding: 25px;
+    padding: 24px;
     text-align: center;
 }
 
-.clock-time {
-    font-size: 48px;
-    font-weight: 700;
+.clock-date {
+    font-size: 11px;
+    font-weight: 600;
+    color: #888;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
-/* Add Task Widget */
+.clock-time {
+    font-size: 52px;
+    font-weight: 800;
+    letter-spacing: -2px;
+}
+
+.clock-ampm {
+    font-size: 14px;
+    font-weight: 600;
+    color: #555;
+}
+
+/* ── Add Task ── */
 .add-task-card {
-    padding: 30px;
+    padding: 24px;
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 12px;
 }
 
-.task-input,
-.tag-input-neo,
-.date-input-neo {
+.add-task-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.task-input {
     border: none;
-    border-bottom: 3px solid var(--text-color);
+    border-bottom: 2px solid var(--accent);
     padding: 10px 0;
-    font-size: 18px;
-    font-weight: 600;
+    font-size: 17px;
+    font-weight: 700;
     background: transparent;
-    color: inherit;
+    color: var(--text);
     outline: none;
+    font-family: inherit;
+}
+
+.task-note-input {
+    border: 1.5px solid #ddd;
+    border-radius: 10px;
+    padding: 8px 10px;
+    font-size: 13px;
+    background: transparent;
+    color: var(--text);
+    outline: none;
+    font-family: inherit;
+    resize: none;
+}
+
+body.dark-mode .task-note-input {
+    border-color: #333;
 }
 
 .task-options {
     display: flex;
-    gap: 15px;
+    gap: 10px;
     align-items: center;
-}
-
-.tag-input-neo {
-    flex: 1;
-    width: 0;
-    min-width: 0;
 }
 
 .select-neo {
     flex: 1;
-    border: 3px solid var(--text-color);
-    border-radius: 12px;
-    padding: 10px;
+    border: 2px solid var(--accent);
+    border-radius: 10px;
+    padding: 8px 10px;
     font-weight: 600;
     background: transparent;
-    color: inherit;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 12px;
+    cursor: pointer;
 }
 
-.date-option {
+.tag-input-neo,
+.date-input-neo {
+    flex: 1;
+    width: 0;
+    min-width: 0;
+    border: none;
+    border-bottom: 2px solid var(--accent);
+    padding: 8px 0;
+    font-size: 13px;
+    font-weight: 600;
+    background: transparent;
+    color: var(--text);
+    outline: none;
+    font-family: inherit;
+}
+
+.label-picker-row {
     display: flex;
     align-items: center;
     gap: 10px;
+}
+
+.label-picker-label {
+    font-size: 12px;
     font-weight: 700;
+    color: var(--muted);
+}
+
+.label-colors {
+    display: flex;
+    gap: 6px;
+}
+
+.color-dot {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid transparent;
+}
+
+.color-dot.selected {
+    transform: scale(1.25);
+    border-color: var(--text);
+}
+
+.none-dot {
+    background: #333;
+}
+
+.recurring-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.toggle-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--muted);
+    white-space: nowrap;
 }
 
 .add-button-neo {
-    background: var(--text-color);
-    color: var(--bg-color);
+    background: var(--text);
+    color: var(--bg);
     border: none;
-    padding: 15px;
-    border-radius: 15px;
+    padding: 14px;
+    border-radius: 12px;
     font-weight: 800;
+    font-family: inherit;
+    font-size: 13px;
     cursor: pointer;
     transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 }
 
 .add-button-neo:hover {
-    transform: scale(0.98);
+    transform: scale(0.97);
 }
 
-/* Task List Card */
+/* ── Task List ── */
 .task-list-card {
-    background: #111;
-    color: white;
-    padding: 30px;
+    padding: 28px;
 }
 
 .list-header-top {
     display: flex;
     flex-direction: column;
-    gap: 15px;
-    margin-bottom: 25px;
+    gap: 14px;
+    margin-bottom: 20px;
 }
 
 .search-container-neo {
     display: flex;
     align-items: center;
-    background: #222;
-    border: 2px solid #444;
-    border-radius: 12px;
-    padding: 10px;
     gap: 10px;
+    background: var(--dark-card);
+    border: 2px solid #333;
+    border-radius: 12px;
+    padding: 10px 14px;
+    color: white;
 }
 
 .search-input-neo {
@@ -222,25 +377,58 @@ body.dark-mode .pill-button {
     border: none;
     color: white;
     font-weight: 600;
+    font-family: inherit;
+    font-size: 14px;
     width: 100%;
     outline: none;
 }
 
+.search-input-neo::placeholder {
+    color: #666;
+}
+
+.icon-btn {
+    background: transparent;
+    border: none;
+    color: #888;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    padding: 2px;
+    transition: 0.2s;
+}
+
+.icon-btn:hover {
+    color: white;
+}
+
+.view-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
 .filters {
     display: flex;
-    gap: 10px;
+    gap: 6px;
 }
 
 .filter-btn {
-    flex: 1;
-    background: #333;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 12px;
+    border-radius: 8px;
     border: none;
-    color: #888;
-    padding: 8px;
-    border-radius: 10px;
+    background: var(--dark-card);
+    color: #666;
     font-weight: 700;
+    font-size: 12px;
+    font-family: inherit;
     cursor: pointer;
-    transition: 0.2s;
+    transition: 0.15s;
 }
 
 .filter-btn.active {
@@ -248,28 +436,38 @@ body.dark-mode .pill-button {
     color: black;
 }
 
-.view-controls {
+.list-sorting {
     display: flex;
-    justify-content: space-between;
+    gap: 8px;
     align-items: center;
-    gap: 15px;
-    margin-top: 10px;
+}
+
+.sort-select {
+    background: var(--dark-card);
+    border: 1px solid #333;
+    color: #888;
+    padding: 5px 8px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-family: inherit;
+    cursor: pointer;
+    outline: none;
 }
 
 .toggle-view {
     display: flex;
-    background: #222;
-    border-radius: 10px;
-    padding: 3px;
-    border: 1px solid #444;
+    background: var(--dark-card);
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 2px;
 }
 
 .view-btn {
     background: transparent;
     border: none;
-    color: #666;
-    padding: 5px 10px;
-    border-radius: 8px;
+    color: #555;
+    padding: 5px 8px;
+    border-radius: 6px;
     cursor: pointer;
     transition: 0.2s;
     display: flex;
@@ -277,219 +475,196 @@ body.dark-mode .pill-button {
 }
 
 .view-btn.active {
-    background: #444;
+    background: #333;
     color: white;
 }
 
-/* Kanban Board Layout */
-.board-container {
-    display: none;
-    /* Hidden by default */
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-    overflow-x: auto;
-    padding-bottom: 20px;
-}
-
-.board-column {
-    background: #1a1a1a;
-    border: 2px solid #333;
-    border-radius: 15px;
-    padding: 15px;
-    min-height: 400px;
+/* Bulk Actions */
+.bulk-actions-neo {
     display: flex;
-    flex-direction: column;
-    gap: 15px;
+    gap: 10px;
+    margin-bottom: 18px;
 }
 
-.column-title {
-    font-size: 14px;
+.action-btn-neo,
+.clear-btn-neo {
+    flex: 1;
+    border: none;
+    padding: 8px;
+    border-radius: 8px;
     font-weight: 800;
-    text-transform: uppercase;
-    color: #888;
-    margin-bottom: 10px;
+    font-size: 11px;
+    font-family: inherit;
+    cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 10px;
-}
-
-.column-count {
-    background: #333;
-    padding: 2px 8px;
-    border-radius: 10px;
-    font-size: 10px;
-}
-
-/* Task Modifications */
-.task-item {
-    position: relative;
-    overflow: hidden;
-}
-
-.pin-btn {
-    background: transparent;
-    border: none;
-    color: #444;
-    cursor: pointer;
+    justify-content: center;
+    gap: 6px;
     transition: 0.2s;
-    padding: 5px;
+}
+
+.action-btn-neo {
+    background: #00C851;
+    color: white;
+}
+
+.clear-btn-neo {
+    background: #ff4444;
+    color: white;
+}
+
+.action-btn-neo:hover {
+    filter: brightness(1.1);
+}
+
+.clear-btn-neo:hover {
+    filter: brightness(1.1);
+}
+
+/* ── Task Items ── */
+.list-container {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.task-item {
+    background: var(--dark-card);
+    border-radius: 14px;
+    border: 1px solid #222;
+    display: flex;
+    flex-direction: column;
+    transition: var(--transition);
+    overflow: hidden;
+    animation: slideIn 0.25s ease;
+}
+
+body.dark-mode .task-item {
+    background: #252525;
+    border-color: #333;
+}
+
+.task-item:hover {
+    transform: translateX(4px);
 }
 
 .task-item.pinned {
     border-top: 4px solid #ff4444;
 }
 
-.task-item.pinned .pin-btn {
-    color: #ff4444;
+/* Status accent on left */
+.task-item[data-status="todo"] {
+    border-left: 5px solid #666;
 }
 
-.task-item-top {
-    display: flex;
-    align-items: flex-start;
-    gap: 15px;
-    width: 100%;
+.task-item[data-status="active"] {
+    border-left: 5px solid #ffbb33;
 }
 
-.subtask-section {
-    margin-top: 10px;
-    padding-left: 45px;
-    border-top: 1px solid #333;
-    padding-top: 10px;
-    display: none;
-    /* Toggle with JS */
-}
-
-.subtask-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 13px;
-    margin-bottom: 5px;
-}
-
-.subtask-checkbox {
-    width: 16px;
-    height: 16px;
-    border: 2px solid #555;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.subtask-item.completed span {
-    text-decoration: line-through;
-    color: #666;
-}
-
-.subtask-add-row {
-    display: flex;
-    gap: 10px;
-    margin-top: 5px;
-}
-
-.subtask-input-mini {
-    background: transparent;
-    border: none;
-    border-bottom: 1px solid #444;
-    color: white;
-    font-size: 12px;
-    flex: 1;
-    outline: none;
-}
-
-.task-actions {
-    display: flex;
-    gap: 8px;
-    margin-left: auto;
-}
-
-.action-icon-btn {
-    background: transparent;
-    border: none;
-    color: #666;
-    cursor: pointer;
-    transition: 0.2s;
-}
-
-.action-icon-btn:hover {
-    color: white;
-}
-
-/* Distinction for Active vs Completed */
-.task-item {
-    background: #222;
-    padding: 15px;
-    border-radius: 15px;
-    border: 1px solid #333;
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    transition: var(--transition);
-    border-left: 6px solid #ffbb33;
-    /* Visual indicator for active */
-}
-
-.task-item:hover {
-    transform: translateX(5px);
-    background: #2a2a2a;
-}
-
-.task-item.completed {
-    opacity: 0.6;
-    background: #1a1a1a;
-    border-left-color: #00C851;
-    /* Visual indicator for completed */
+.task-item[data-status="completed"] {
+    border-left: 5px solid #00C851;
 }
 
 .task-item.completed .task-text {
     text-decoration: line-through;
-    color: #666;
+    color: #555;
 }
 
-.custom-checkbox {
-    width: 24px;
-    height: 24px;
-    border: 3px solid white;
-    border-radius: 6px;
+/* Top row of a task */
+.task-item-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px;
+}
+
+/* Status cycle button */
+.status-cycle {
+    width: 26px;
+    height: 26px;
+    border-radius: 7px;
+    border: 2.5px solid #555;
     cursor: pointer;
+    background: transparent;
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
     transition: 0.2s;
+    margin-top: 1px;
 }
 
-.task-item.completed .custom-checkbox {
-    background: #00C851;
+.status-cycle:hover {
+    border-color: white;
+}
+
+.task-item[data-status="todo"] .status-cycle {
+    border-color: #666;
+}
+
+.task-item[data-status="active"] .status-cycle {
+    border-color: #ffbb33;
+    background: #ffbb3322;
+}
+
+.task-item[data-status="completed"] .status-cycle {
     border-color: #00C851;
+    background: #00C85122;
 }
 
-/* Checkmark SVG styling */
-.checkmark-svg {
-    width: 14px;
-    height: 14px;
-    color: white;
+.status-icon {
+    width: 13px;
+    height: 13px;
 }
 
 .task-content {
     flex: 1;
+    min-width: 0;
 }
 
 .task-text {
     font-weight: 700;
-    font-size: 16px;
+    font-size: 15px;
     outline: none;
+    color: white;
+    word-break: break-word;
+    display: block;
+}
+
+body.dark-mode .task-text {
+    color: #f0f0f0;
+}
+
+.task-note {
+    font-size: 12px;
+    color: #777;
+    margin-top: 3px;
+    display: block;
+    word-break: break-word;
 }
 
 .task-meta {
     display: flex;
     align-items: center;
-    gap: 8px;
-    margin-top: 5px;
+    gap: 6px;
+    margin-top: 6px;
+    flex-wrap: wrap;
+}
+
+/* Color label stripe */
+.color-label {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
 }
 
 .priority-badge {
     font-size: 9px;
-    padding: 2px 8px;
-    border-radius: 5px;
+    padding: 2px 7px;
+    border-radius: 4px;
     font-weight: 900;
 }
 
@@ -509,73 +684,95 @@ body.dark-mode .pill-button {
 }
 
 .tag-badge {
-    background: #444;
-    color: #ccc;
+    background: #1e1e30;
+    color: #aaa;
     font-size: 9px;
-    padding: 2px 8px;
-    border-radius: 5px;
+    padding: 2px 7px;
+    border-radius: 4px;
     font-weight: 700;
 }
 
 .due-date-badge {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 4px;
+    gap: 3px;
     font-size: 9px;
-    color: #888;
+    color: #777;
 }
 
-.delete-btn {
-    background: none;
-    border: none;
+.due-date-badge.overdue {
     color: #ff4444;
-    font-size: 24px;
-    font-weight: 300;
+}
+
+.recurring-badge {
+    color: #33b5e5;
+    font-size: 9px;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.subtask-count {
+    color: #888;
+    font-size: 9px;
+    padding: 2px 7px;
+    border-radius: 4px;
+    background: #1e1e1e;
+    font-weight: 700;
+}
+
+/* Task action buttons */
+.task-actions {
+    display: flex;
+    gap: 4px;
+    align-items: flex-start;
+    margin-top: 1px;
+}
+
+.task-icon-btn {
+    background: transparent;
+    border: none;
+    color: #444;
     cursor: pointer;
-    opacity: 0;
-    transition: 0.2s;
+    transition: 0.15s;
+    padding: 4px;
+    border-radius: 6px;
+    display: flex;
 }
 
-.task-item:hover .delete-btn {
-    opacity: 1;
+.task-icon-btn:hover {
+    color: white;
+    background: #333;
 }
 
-/* Board Specific Task Styling */
-.board-column .task-item {
-    padding: 12px;
-    font-size: 14px;
-    background: #252525;
+.task-icon-btn.active-pin {
+    color: #ff4444;
 }
 
-.board-column .task-item-top {
-    flex-wrap: wrap;
+.task-icon-btn.delete-btn:hover {
+    color: #ff4444;
+    background: #ff444430;
 }
 
-.board-column .task-meta {
-    width: 100%;
-    margin-top: 8px;
-    flex-wrap: wrap;
-}
-
-.board-column .task-actions {
-    width: 100%;
-    justify-content: flex-end;
-    margin-top: 5px;
-    border-top: 1px solid #333;
-    padding-top: 5px;
-}
-
+/* Subtask section */
 .subtask-section {
+    background: #0d0d0d;
+    border-top: 1px solid #222;
+    padding: 12px 14px 10px 52px;
+}
+
+body.dark-mode .subtask-section {
     background: #1a1a1a;
-    border-radius: 8px;
-    margin-top: 10px;
-    padding: 10px;
-    border: 1px solid #333;
 }
 
 .subtask-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #ccc;
     padding: 4px 0;
-    border-bottom: 1px solid #222;
+    border-bottom: 1px solid #1e1e1e;
 }
 
 .subtask-item:last-child {
@@ -583,12 +780,26 @@ body.dark-mode .pill-button {
 }
 
 .subtask-checkbox {
+    width: 16px;
+    height: 16px;
+    border: 2px solid #444;
+    border-radius: 4px;
+    cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 10px;
-    font-weight: 800;
-    color: #00C851;
+    flex-shrink: 0;
+    transition: 0.15s;
+}
+
+.subtask-item.done .subtask-checkbox {
+    background: #00C851;
+    border-color: #00C851;
+}
+
+.subtask-item.done span {
+    text-decoration: line-through;
+    color: #555;
 }
 
 .subtask-item span {
@@ -596,21 +807,298 @@ body.dark-mode .pill-button {
     flex: 1;
 }
 
-/* Scrollbar for Board */
-.board-container::-webkit-scrollbar {
-    height: 8px;
+.mini-del-sub {
+    background: none;
+    border: none;
+    color: #444;
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    padding: 0 4px;
 }
 
-.board-container::-webkit-scrollbar-thumb {
-    background: #444;
-    border-radius: 10px;
+.mini-del-sub:hover {
+    color: #ff4444;
 }
 
-/* Animations */
+.subtask-add-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-top: 8px;
+}
+
+.subtask-input-mini {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid #333;
+    color: #ccc;
+    font-size: 12px;
+    flex: 1;
+    outline: none;
+    font-family: inherit;
+    padding: 4px 0;
+}
+
+.mini-add-btn {
+    background: #333;
+    border: none;
+    color: white;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.15s;
+}
+
+.mini-add-btn:hover {
+    background: #00C851;
+}
+
+/* ── Board / Kanban ── */
+.board-container {
+    display: none;
+    gap: 18px;
+    padding-bottom: 10px;
+}
+
+.board-container.active {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.board-column {
+    background: #111;
+    border: 1px solid #222;
+    border-radius: 14px;
+    padding: 14px;
+    min-height: 350px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.column-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #222;
+}
+
+.column-count {
+    background: #222;
+    padding: 2px 8px;
+    border-radius: 8px;
+    font-size: 10px;
+}
+
+.board-column .task-item {
+    transform: none !important;
+}
+
+.board-column .task-item:hover {
+    opacity: 0.9;
+}
+
+/* ── Progress Ring ── */
+.progress-container {
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.circle-svg {
+    width: 160px;
+    height: 160px;
+    transform: rotate(-90deg);
+    overflow: visible;
+}
+
+.circle-bg {
+    fill: none;
+    stroke: #222;
+    stroke-width: 12;
+}
+
+.circle-progress {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 12;
+    stroke-linecap: round;
+    stroke-dasharray: 440;
+    stroke-dashoffset: 440;
+    transition: stroke-dashoffset 0.6s ease;
+}
+
+.circle-pct-text {
+    fill: white;
+    font-size: 26px;
+    font-weight: 800;
+    font-family: 'Outfit', sans-serif;
+    transform: rotate(90deg);
+    transform-origin: center;
+    transform-box: fill-box;
+}
+
+body:not(.dark-mode) .circle-pct-text {
+    fill: black;
+}
+
+.progress-label {
+    background: var(--text);
+    color: var(--bg);
+    padding: 7px 16px;
+    border-radius: 20px;
+    font-weight: 800;
+    font-size: 13px;
+}
+
+.stats-mini {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--muted);
+}
+
+.data-actions-neo {
+    display: flex;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.mini-btn-neo {
+    background: var(--card);
+    border: var(--border);
+    padding: 6px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    font-family: inherit;
+    color: var(--text);
+}
+
+.mini-btn-neo:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+/* ── Empty State ── */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 40px 0;
+    color: #444;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+/* ── Modal ── */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(4px);
+}
+
+.modal-box {
+    background: var(--card);
+    border: var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 28px;
+    width: 360px;
+    animation: slideIn 0.2s ease;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.modal-header h3 {
+    font-weight: 800;
+    font-size: 16px;
+}
+
+.shortcut-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.shortcut-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+}
+
+kbd {
+    background: #111;
+    color: white;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-family: monospace;
+    font-size: 12px;
+    border: 1px solid #444;
+    min-width: 60px;
+    text-align: center;
+}
+
+/* ── Toast ── */
+.toast {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: #111;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 14px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    z-index: 2000;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.25s ease;
+    pointer-events: none;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ── Animations ── */
 @keyframes slideIn {
     from {
         opacity: 0;
-        transform: translateY(10px);
+        transform: translateY(8px);
     }
 
     to {
@@ -619,81 +1107,25 @@ body.dark-mode .pill-button {
     }
 }
 
-.task-item {
-    animation: slideIn 0.3s ease forwards;
-}
+/* ── Responsive ── */
+@media (max-width: 820px) {
+    body {
+        padding: 20px;
+    }
 
-.circle-svg {
-    width: 160px;
-    height: 160px;
-    transform: rotate(-90deg);
-}
-
-.circle-bg {
-    fill: none;
-    stroke: #eee;
-    stroke-width: 12;
-}
-
-body.dark-mode .circle-bg {
-    stroke: #333;
-}
-
-.circle-progress {
-    fill: none;
-    stroke: var(--text-color);
-    stroke-width: 12;
-    stroke-linecap: round;
-    stroke-dasharray: 440;
-    stroke-dashoffset: 440;
-    transition: stroke-dashoffset 0.6s ease;
-}
-
-.progress-label {
-    background: var(--text-color);
-    color: var(--bg-color);
-    padding: 8px 16px;
-    border-radius: 20px;
-    font-weight: 800;
-}
-
-.stats-mini {
-    font-size: 11px;
-    font-weight: 700;
-    color: #666;
-}
-
-.data-actions-neo {
-    display: flex;
-    gap: 10px;
-    margin-top: 10px;
-}
-
-.mini-btn-neo {
-    background: var(--card-bg);
-    border: 2px solid var(--text-color);
-    padding: 5px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: 0.2s;
-    display: flex;
-}
-
-.mini-btn-neo:hover {
-    transform: translateY(-2px);
-    box-shadow: 2px 2px 0px var(--text-color);
-}
-
-@media (max-width: 900px) {
     .dashboard-grid {
         grid-template-columns: 1fr;
     }
 
     .hero-title {
-        font-size: 50px;
+        font-size: 44px;
     }
 
     .sidebar {
         position: static;
+    }
+
+    .board-container.active {
+        grid-template-columns: 1fr;
     }
 }
