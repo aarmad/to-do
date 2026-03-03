@@ -248,41 +248,173 @@ body.dark-mode .pill-button {
     color: black;
 }
 
-.bulk-actions-neo {
+.view-controls {
     display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-top: 10px;
 }
 
-.action-btn-neo,
-.clear-btn-neo {
-    flex: 1;
-    border: none;
-    padding: 8px;
+.toggle-view {
+    display: flex;
+    background: #222;
     border-radius: 10px;
-    font-weight: 800;
-    font-size: 11px;
+    padding: 3px;
+    border: 1px solid #444;
+}
+
+.view-btn {
+    background: transparent;
+    border: none;
+    color: #666;
+    padding: 5px 10px;
+    border-radius: 8px;
     cursor: pointer;
+    transition: 0.2s;
+    display: flex;
+    align-items: center;
 }
 
-.action-btn-neo {
-    background: #00C851;
+.view-btn.active {
+    background: #444;
     color: white;
 }
 
-.clear-btn-neo {
-    background: #ff4444;
-    color: white;
+/* Kanban Board Layout */
+.board-container {
+    display: none;
+    /* Hidden by default */
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    overflow-x: auto;
+    padding-bottom: 20px;
 }
 
-.list-container {
-    list-style: none;
+.board-column {
+    background: #1a1a1a;
+    border: 2px solid #333;
+    border-radius: 15px;
+    padding: 15px;
+    min-height: 400px;
     display: flex;
     flex-direction: column;
     gap: 15px;
 }
 
-/* Clarity for Active vs Completed */
+.column-title {
+    font-size: 14px;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: #888;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.column-count {
+    background: #333;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 10px;
+}
+
+/* Task Modifications */
+.task-item {
+    position: relative;
+    overflow: hidden;
+}
+
+.pin-btn {
+    background: transparent;
+    border: none;
+    color: #444;
+    cursor: pointer;
+    transition: 0.2s;
+    padding: 5px;
+}
+
+.task-item.pinned {
+    border-top: 4px solid #ff4444;
+}
+
+.task-item.pinned .pin-btn {
+    color: #ff4444;
+}
+
+.task-item-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    width: 100%;
+}
+
+.subtask-section {
+    margin-top: 10px;
+    padding-left: 45px;
+    border-top: 1px solid #333;
+    padding-top: 10px;
+    display: none;
+    /* Toggle with JS */
+}
+
+.subtask-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    margin-bottom: 5px;
+}
+
+.subtask-checkbox {
+    width: 16px;
+    height: 16px;
+    border: 2px solid #555;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.subtask-item.completed span {
+    text-decoration: line-through;
+    color: #666;
+}
+
+.subtask-add-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 5px;
+}
+
+.subtask-input-mini {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid #444;
+    color: white;
+    font-size: 12px;
+    flex: 1;
+    outline: none;
+}
+
+.task-actions {
+    display: flex;
+    gap: 8px;
+    margin-left: auto;
+}
+
+.action-icon-btn {
+    background: transparent;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.action-icon-btn:hover {
+    color: white;
+}
+
+/* Distinction for Active vs Completed */
 .task-item {
     background: #222;
     padding: 15px;
@@ -408,13 +540,87 @@ body.dark-mode .pill-button {
     opacity: 1;
 }
 
-/* Progress & Data Widget */
-.progress-container {
-    padding: 30px 15px;
+/* Board Specific Task Styling */
+.board-column .task-item {
+    padding: 12px;
+    font-size: 14px;
+    background: #252525;
+}
+
+.board-column .task-item-top {
+    flex-wrap: wrap;
+}
+
+.board-column .task-meta {
+    width: 100%;
+    margin-top: 8px;
+    flex-wrap: wrap;
+}
+
+.board-column .task-actions {
+    width: 100%;
+    justify-content: flex-end;
+    margin-top: 5px;
+    border-top: 1px solid #333;
+    padding-top: 5px;
+}
+
+.subtask-section {
+    background: #1a1a1a;
+    border-radius: 8px;
+    margin-top: 10px;
+    padding: 10px;
+    border: 1px solid #333;
+}
+
+.subtask-item {
+    padding: 4px 0;
+    border-bottom: 1px solid #222;
+}
+
+.subtask-item:last-child {
+    border-bottom: none;
+}
+
+.subtask-checkbox {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: 15px;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 800;
+    color: #00C851;
+}
+
+.subtask-item span {
+    outline: none;
+    flex: 1;
+}
+
+/* Scrollbar for Board */
+.board-container::-webkit-scrollbar {
+    height: 8px;
+}
+
+.board-container::-webkit-scrollbar-thumb {
+    background: #444;
+    border-radius: 10px;
+}
+
+/* Animations */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.task-item {
+    animation: slideIn 0.3s ease forwards;
 }
 
 .circle-svg {
