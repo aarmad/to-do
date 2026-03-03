@@ -1,5 +1,5 @@
 /* ===========================
-   Neo-List — script.js (v5)
+   Neo-List — script.js (v6)
    =========================== */
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -43,6 +43,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const pomoStart = document.getElementById('pomoStart');
     const pomoReset = document.getElementById('pomoReset');
     const pomoModes = document.querySelectorAll('.pomo-mode');
+    const pomoSettingsBtn = document.getElementById('pomoSettingsBtn');
+    const pomoSettings = document.getElementById('pomoSettings');
+    const pomoWorkInput = document.getElementById('pomoWorkInput');
+    const pomoBreakInput = document.getElementById('pomoBreakInput');
+
+    // Daily Target refs
+    const dailyTargetInput = document.getElementById('dailyTargetInput');
+    const targetFill = document.getElementById('targetFill');
+    const targetText = document.getElementById('targetText');
+
+    // Scratchpad refs
+    const scratchpad = document.getElementById('scratchpad');
 
     // Stat chips
     const statTodo = document.getElementById('statTodo');
@@ -56,22 +68,24 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentView = localStorage.getItem('neoView') || 'list';
     let selectedColor = '#ff4444';
 
-    // Pomodoro state
+    // Pomodoro settings
+    let pomoWorkTime = parseInt(localStorage.getItem('pomoWork')) || 25;
+    let pomoBreakTime = parseInt(localStorage.getItem('pomoBreak')) || 5;
     let pomoInterval;
-    let pomoTimeLeft = 25 * 60;
+    let pomoTimeLeft = pomoWorkTime * 60;
     let pomoIsRunning = false;
+    let pomoCurrentMode = 'work'; // 'work' or 'break'
+
+    // Daily Target
+    let dailyTarget = parseInt(localStorage.getItem('neoDailyTarget')) || 5;
 
     // ── SVG Strings ───────────────────────────────────────────────────────────
     const SVG = {
         sun: `<path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42M12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10z"/>`,
         moon: `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>`,
-
-        // Status icons
         todo: `<circle cx="12" cy="12" r="5" fill="none" stroke="#888" stroke-width="2.5"/>`,
         active: `<polygon points="5 3 19 12 5 21 5 3" fill="#ffbb33"/>`,
         completed: `<polyline points="20 6 9 17 4 12" stroke="#00C851" stroke-width="3" stroke-linecap="round" fill="none"/>`,
-
-        // Misc
         pin: `<path d="M21 10V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l2-1.14"/><path d="m7.5 4.27 9 5.15"/><polyline points="3.29 7 12 12 20.71 7"/><line x1="12" y1="22" x2="12" y2="12"/>`,
         expand: `<polyline points="6 9 12 15 18 9"/>`,
         trash: `<polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/>`,
@@ -89,9 +103,24 @@ document.addEventListener('DOMContentLoaded', () => {
     setInterval(updateClock, 1000);
     applyTheme(localStorage.getItem('neoTheme') === 'dark');
     applyView(currentView);
+
+    // Load Pomodoro settings
+    pomoWorkInput.value = pomoWorkTime;
+    pomoBreakInput.value = pomoBreakTime;
+    pomoTimeLeft = pomoWorkTime * 60;
+    updatePomoDisplay();
+
+    // Load Daily Target
+    dailyTargetInput.value = dailyTarget;
+
+    // Load Scratchpad
+    scratchpad.value = localStorage.getItem('neoScratchpad') || '';
+
     renderTasks();
 
-    // ── Color Picker ──────────────────────────────────────────────────────────
+    // ── Listeners ─────────────────────────────────────────────────────────────
+
+    // Color Picker
     colorDots.forEach(dot => {
         dot.addEventListener('click', () => {
             colorDots.forEach(d => d.classList.remove('selected'));
@@ -100,7 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // ── Theme ─────────────────────────────────────────────────────────────────
+    // Theme
     themeToggle.addEventListener('click', () => {
         const dark = !document.body.classList.contains('dark-mode');
         applyTheme(dark);
@@ -112,7 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
         themeIcon.innerHTML = dark ? SVG.sun : SVG.moon;
     }
 
-    // ── Add Task ──────────────────────────────────────────────────────────────
+    // Add Task
     function addTask() {
         const text = taskInput.value.trim();
         if (!text) { showToast('Écris une tâche d\'abord !'); return; }
@@ -148,7 +177,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); addTask(); }
     });
 
-    // ── Search ────────────────────────────────────────────────────────────────
+    // Search
     searchInput.addEventListener('input', e => {
         searchQuery = e.target.value.toLowerCase();
         clearSearch.style.display = searchQuery ? 'flex' : 'none';
@@ -162,7 +191,7 @@ document.addEventListener('DOMContentLoaded', () => {
         renderTasks();
     });
 
-    // ── Filters ───────────────────────────────────────────────────────────────
+    // Filters
     filterBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             filterBtns.forEach(b => b.classList.remove('active'));
@@ -172,10 +201,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // ── Sort ──────────────────────────────────────────────────────────────────
+    // Sort
     sortSelect.addEventListener('change', renderTasks);
 
-    // ── Bulk Actions ──────────────────────────────────────────────────────────
+    // Bulk Actions
     markAllBtn.addEventListener('click', () => {
         tasks = tasks.map(t => ({ ...t, status: 'completed' }));
         saveAndRender();
@@ -186,9 +215,6 @@ document.addEventListener('DOMContentLoaded', () => {
     clearBtn.addEventListener('click', () => {
         if (clearBtn.textContent.includes('SÛR')) {
             tasks = [];
-            searchQuery = '';
-            searchInput.value = '';
-            clearSearch.style.display = 'none';
             saveAndRender();
             clearBtn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">${SVG.trash}</svg> EFFACER TOUT`;
             clearTimeout(clearTimeout_);
@@ -201,7 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // ── View Toggle ───────────────────────────────────────────────────────────
+    // View Toggle
     listViewBtn.addEventListener('click', () => { applyView('list'); renderTasks(); });
     boardViewBtn.addEventListener('click', () => { applyView('board'); renderTasks(); });
 
@@ -233,8 +259,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (pomoTimeLeft <= 0) {
                     clearInterval(pomoInterval);
                     pomoIsRunning = false;
-                    showToast('Focus terminé !');
-                    new Audio('data:audio/wav;base64,UklGRl9vT19XQVZFRm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YV9vT19vT19vT19vT19vT19vT19vT19vT19vT19vT18='); // Dummy chime
+                    pomoStart.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">${SVG.play}</svg>`;
+                    showToast(pomoCurrentMode === 'work' ? 'Temps écoulé ! Pause ?' : 'Pause finie ! Au boulot !');
+                    // Play a soft beep
+                    const context = new (window.AudioContext || window.webkitAudioContext)();
+                    const osc = context.createOscillator();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(440, context.currentTime);
+                    osc.connect(context.destination);
+                    osc.start();
+                    osc.stop(context.currentTime + 0.3);
                 }
             }, 1000);
             pomoStart.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">${SVG.pause}</svg>`;
@@ -246,7 +280,7 @@ document.addEventListener('DOMContentLoaded', () => {
         clearInterval(pomoInterval);
         pomoIsRunning = false;
         const activeMode = document.querySelector('.pomo-mode.active');
-        pomoTimeLeft = parseInt(activeMode.dataset.time) * 60;
+        pomoTimeLeft = (activeMode.dataset.time === 'work' ? pomoWorkTime : pomoBreakTime) * 60;
         updatePomoDisplay();
         pomoStart.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">${SVG.play}</svg>`;
     });
@@ -257,19 +291,52 @@ document.addEventListener('DOMContentLoaded', () => {
             mode.classList.add('active');
             clearInterval(pomoInterval);
             pomoIsRunning = false;
-            pomoTimeLeft = parseInt(mode.dataset.time) * 60;
+            pomoCurrentMode = mode.textContent.toLowerCase().includes('travail') ? 'work' : 'break';
+            pomoTimeLeft = (pomoCurrentMode === 'work' ? pomoWorkTime : pomoBreakTime) * 60;
             updatePomoDisplay();
             pomoStart.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">${SVG.play}</svg>`;
         });
     });
 
-    // ── Drag and Drop Logic ──────────────────────────────────────────────────
-    let draggedTaskId = null;
+    pomoSettingsBtn.addEventListener('click', () => {
+        pomoSettings.style.display = pomoSettings.style.display === 'none' ? 'block' : 'none';
+        pomoSettingsBtn.classList.toggle('active');
+    });
 
+    pomoWorkInput.addEventListener('change', () => {
+        pomoWorkTime = parseInt(pomoWorkInput.value) || 25;
+        localStorage.setItem('pomoWork', pomoWorkTime);
+        if (pomoCurrentMode === 'work' && !pomoIsRunning) {
+            pomoTimeLeft = pomoWorkTime * 60;
+            updatePomoDisplay();
+        }
+    });
+
+    pomoBreakInput.addEventListener('change', () => {
+        pomoBreakTime = parseInt(pomoBreakInput.value) || 5;
+        localStorage.setItem('pomoBreak', pomoBreakTime);
+        if (pomoCurrentMode === 'break' && !pomoIsRunning) {
+            pomoTimeLeft = pomoBreakTime * 60;
+            updatePomoDisplay();
+        }
+    });
+
+    // ── Daily Target Logic ───────────────────────────────────────────────────
+    dailyTargetInput.addEventListener('change', () => {
+        dailyTarget = parseInt(dailyTargetInput.value) || 5;
+        localStorage.setItem('neoDailyTarget', dailyTarget);
+        updateUI();
+    });
+
+    // ── Scratchpad Logic ─────────────────────────────────────────────────────
+    scratchpad.addEventListener('input', () => {
+        localStorage.setItem('neoScratchpad', scratchpad.value);
+    });
+
+    // ── Drag and Drop ────────────────────────────────────────────────────────
     function initDragAndDrop(el, taskId) {
         el.draggable = true;
         el.addEventListener('dragstart', (e) => {
-            draggedTaskId = taskId;
             el.classList.add('dragging');
             e.dataTransfer.setData('task-id', taskId);
         });
@@ -299,50 +366,24 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ── Confetti Logic ───────────────────────────────────────────────────────
+    // ── Confetti ─────────────────────────────────────────────────────────────
     function launchConfetti() {
         showToast('Bravo ! 🎉');
-        // Simple SVG particle effect can be complex, let's just use CSS for a pop effect
         document.body.classList.add('confetti-active');
-        setTimeout(() => document.body.classList.remove('confetti-active'), 1000);
-    }
-
-    // ── Shortcuts Modal ───────────────────────────────────────────────────────
-    shortcutsBtn.addEventListener('click', () => shortcutsModal.style.display = 'flex');
-    closeModal.addEventListener('click', () => shortcutsModal.style.display = 'none');
-    shortcutsModal.addEventListener('click', e => { if (e.target === shortcutsModal) shortcutsModal.style.display = 'none'; });
-
-    // ── Keyboard Shortcuts ────────────────────────────────────────────────────
-    document.addEventListener('keydown', e => {
-        if (e.target.matches('input, textarea, select, [contenteditable]')) return;
-        const key = e.key.toLowerCase();
-        if (key === 'n') { taskInput.focus(); e.preventDefault(); }
-        if (key === '/') { searchInput.focus(); e.preventDefault(); }
-        if (key === 't') { themeToggle.click(); }
-        if (key === 'v') { currentView === 'list' ? boardViewBtn.click() : listViewBtn.click(); }
-        if (key === 'p') { pomoStart.click(); }
-        if (key === 'escape') { shortcutsModal.style.display = 'none'; }
-        if (key === '1') { clickFilter('all'); }
-        if (key === '2') { clickFilter('todo'); }
-        if (key === '3') { clickFilter('active'); }
-        if (key === '4') { clickFilter('completed'); }
-    });
-
-    function clickFilter(f) {
-        const btn = document.querySelector(`.filter-btn[data-filter="${f}"]`);
-        if (btn) btn.click();
+        setTimeout(() => document.body.classList.remove('confetti-active'), 800);
     }
 
     // ── Render ────────────────────────────────────────────────────────────────
     function renderTasks() {
-        taskList.innerHTML = '';
+        const list = document.getElementById('taskList');
+        list.innerHTML = '';
         boardContainer.innerHTML = '';
 
         const filtered = getFiltered();
         emptyState.style.display = filtered.length === 0 ? 'flex' : 'none';
 
         if (currentView === 'list') {
-            filtered.forEach(t => taskList.appendChild(createTaskEl(t)));
+            filtered.forEach(t => list.appendChild(createTaskEl(t)));
         } else {
             buildBoard(filtered);
             initColumnDrop();
@@ -352,13 +393,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function getFiltered() {
         const raw = tasks.filter(t => {
-            const matchFilter = currentFilter === 'all' ||
-                (currentFilter === 'todo' && t.status === 'todo') ||
-                (currentFilter === 'active' && t.status === 'active') ||
-                (currentFilter === 'completed' && t.status === 'completed');
+            const matchFilter = currentFilter === 'all' || t.status === currentFilter;
             const matchSearch = !searchQuery ||
                 t.text.toLowerCase().includes(searchQuery) ||
-                (t.tag && t.tag.toLowerCase().includes(searchQuery)) ||
+                t.tag.toLowerCase().includes(searchQuery) ||
                 (t.note && t.note.toLowerCase().includes(searchQuery));
             return matchFilter && matchSearch;
         });
@@ -367,10 +405,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const pScore = { high: 3, medium: 2, low: 1 };
         raw.sort((a, b) => {
             if (a.pinned !== b.pinned) return b.pinned ? 1 : -1;
-            if (sort === 'priority') return pScore[b.priority || 'medium'] - pScore[a.priority || 'medium'];
+            if (sort === 'priority') return pScore[b.priority] - pScore[a.priority];
             if (sort === 'alpha') return a.text.localeCompare(b.text);
             if (sort === 'date') return (a.dueDate || '9999') < (b.dueDate || '9999') ? -1 : 1;
-            if (sort === 'created') return new Date(b.createdAt) - new Date(a.createdAt);
+            if (sort === 'created') return b.id - a.id;
             return 0;
         });
         return raw;
@@ -400,18 +438,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function createTaskEl(task, compact = false) {
-        task.status = task.status || (task.completed ? 'completed' : 'todo');
-        task.subtasks = task.subtasks || [];
-
         const li = document.createElement('li');
         li.className = `task-item${task.status === 'completed' ? ' completed' : ''}${task.pinned ? ' pinned' : ''}`;
         li.dataset.id = task.id;
         li.dataset.status = task.status;
-
         initDragAndDrop(li, task.id);
 
-        const pBadge = `<span class="priority-badge priority-${task.priority || 'medium'}">${(task.priority || 'medium').toUpperCase()}</span>`;
-        const tagBadge = `<span class="tag-badge">#${task.tag || 'Général'}</span>`;
+        const pBadge = `<span class="priority-badge priority-${task.priority}">${task.priority.toUpperCase()}</span>`;
+        const tagBadge = `<span class="tag-badge">#${task.tag}</span>`;
 
         let dateHtml = '';
         if (task.dueDate) {
@@ -422,12 +456,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const colorDot = task.color ? `<span class="color-label" style="background:${task.color}"></span>` : '';
-        const subCount = task.subtasks.length ? `<span class="subtask-count">${task.subtasks.filter(s => s.done).length}/${task.subtasks.length}</span>` : '';
+        const subCount = task.subtasks && task.subtasks.length ? `<span class="subtask-count">${task.subtasks.filter(s => s.done).length}/${task.subtasks.length}</span>` : '';
         const recurBadge = task.recurring ? `<span class="recurring-badge"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">${SVG.repeat}</svg></span>` : '';
         const statusIcon = task.status === 'completed' ? SVG.completed : task.status === 'active' ? SVG.active : SVG.todo;
         const noteHtml = task.note ? `<span class="task-note">${escHtml(task.note)}</span>` : '';
 
-        const subsHtml = task.subtasks.map((s, idx) => `
+        const subsHtml = (task.subtasks || []).map((s, idx) => `
           <div class="subtask-item ${s.done ? 'done' : ''}" data-idx="${idx}">
             <div class="subtask-checkbox">${s.done ? `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3">${SVG.check}</svg>` : ''}</div>
             <span contenteditable="true">${escHtml(s.text)}</span>
@@ -459,69 +493,72 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
           </div>`;
 
-        li.querySelector('.status-cycle').addEventListener('click', e => {
+        // Event listeners (re-init)
+        li.querySelector('.status-cycle').onclick = (e) => {
             e.stopPropagation();
             const order = ['todo', 'active', 'completed'];
             task.status = order[(order.indexOf(task.status) + 1) % 3];
             task.completed = task.status === 'completed';
             if (task.completed) launchConfetti();
             saveAndRender();
-        });
+        };
 
-        li.querySelector('.duplicate-btn').addEventListener('click', e => {
+        li.querySelector('.duplicate-btn').onclick = (e) => {
             e.stopPropagation();
             const clone = { ...task, id: Date.now(), text: task.text + ' (Copie)', expanded: false };
             tasks.push(clone);
             saveAndRender();
             showToast('Tâche dupliquée !');
-        });
+        };
 
-        li.querySelector('.pin-btn').addEventListener('click', e => {
+        li.querySelector('.pin-btn').onclick = (e) => {
             e.stopPropagation();
             task.pinned = !task.pinned;
             saveAndRender();
-        });
+        };
 
-        li.querySelector('.expand-btn').addEventListener('click', e => {
+        li.querySelector('.expand-btn').onclick = (e) => {
             e.stopPropagation();
             task.expanded = !task.expanded;
             saveTasks();
             renderTasks();
-        });
+        };
 
-        li.querySelector('.delete-btn').addEventListener('click', e => {
+        li.querySelector('.delete-btn').onclick = (e) => {
             e.stopPropagation();
             tasks = tasks.filter(t => t.id !== task.id);
             saveAndRender();
-        });
+        };
 
         const textSpan = li.querySelector('.task-text');
-        textSpan.addEventListener('blur', () => {
+        textSpan.onblur = () => {
             const val = textSpan.innerText.trim();
             if (val && val !== task.text) { task.text = val; saveTasks(); }
-        });
+        };
 
-        // Subtask events (simplified)
+        // Subtasks logic...
         li.querySelectorAll('.subtask-item').forEach(item => {
             const idx = +item.dataset.idx;
-            item.querySelector('.subtask-checkbox').addEventListener('click', () => {
+            item.querySelector('.subtask-checkbox').onclick = () => {
                 task.subtasks[idx].done = !task.subtasks[idx].done;
                 if (task.subtasks[idx].done) launchConfetti();
                 saveAndRender();
-            });
-            item.querySelector('.mini-del-sub').addEventListener('click', () => {
+            };
+            item.querySelector('.mini-del-sub').onclick = () => {
                 task.subtasks.splice(idx, 1);
                 saveAndRender();
-            });
+            };
         });
 
         const subInput = li.querySelector('.subtask-input-mini');
-        li.querySelector('.mini-add-btn').addEventListener('click', () => {
-            if (subInput.value.trim()) {
-                task.subtasks.push({ text: subInput.value.trim(), done: false });
+        li.querySelector('.mini-add-btn').onclick = () => {
+            const val = subInput.value.trim();
+            if (val) {
+                if (!task.subtasks) task.subtasks = [];
+                task.subtasks.push({ text: val, done: false });
                 saveAndRender();
             }
-        });
+        };
 
         return li;
     }
@@ -535,13 +572,26 @@ document.addEventListener('DOMContentLoaded', () => {
         const active = tasks.filter(t => t.status === 'active').length;
         const todo = tasks.filter(t => t.status === 'todo').length;
         const pct = total === 0 ? 0 : Math.round((done / total) * 100);
+
         progressBar.style.strokeDashoffset = 440 - (pct / 100) * 440;
         circlePct.textContent = `${pct}%`;
         progressText.textContent = `${done}/${total} éléments`;
         statsDetail.textContent = `${active} en cours • ${done} terminées`;
+
         statTodo.textContent = todo;
         statActive.textContent = active;
         statDone.textContent = done;
+
+        // Daily Target Update
+        const targetPercent = Math.min((done / dailyTarget) * 100, 100);
+        targetFill.style.width = `${targetPercent}%`;
+        targetText.textContent = `${done}/${dailyTarget} terminées`;
+        if (done >= dailyTarget && total > 0) {
+            targetText.style.color = '#00C851';
+            targetText.textContent = 'Objectif atteint ! 🔥';
+        } else {
+            targetText.style.color = '';
+        }
     }
 
     function updateClock() {
@@ -555,33 +605,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function pad(n) { return String(n).padStart(2, '0'); }
 
-    let toastTimeout;
     function showToast(msg) {
         const el = document.getElementById('toast');
         el.textContent = msg;
         el.classList.add('show');
-        clearTimeout(toastTimeout);
-        toastTimeout = setTimeout(() => el.classList.remove('show'), 2500);
+        setTimeout(() => el.classList.remove('show'), 2500);
     }
+
+    // Modal
+    shortcutsBtn.onclick = () => shortcutsModal.style.display = 'flex';
+    closeModal.onclick = () => shortcutsModal.style.display = 'none';
+    window.onclick = (e) => { if (e.target === shortcutsModal) shortcutsModal.style.display = 'none'; };
 
     // Export/Import
-    exportBtn.addEventListener('click', () => {
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(tasks, null, 2));
+    exportBtn.onclick = () => {
         const a = document.createElement('a');
-        a.href = dataStr; a.download = 'neo_tasks.json'; a.click();
-    });
-
-    importBtn.addEventListener('click', () => importFile.click());
-    importFile.addEventListener('change', e => {
+        a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(tasks, null, 2));
+        a.download = 'neo_tasks.json'; a.click();
+    };
+    importBtn.onclick = () => importFile.click();
+    importFile.onchange = (e) => {
         const reader = new FileReader();
-        reader.onload = ev => {
-            try { tasks = JSON.parse(ev.target.result); saveAndRender(); showToast('Importé !'); }
-            catch { showToast('Erreur JSON'); }
-        };
+        reader.onload = ev => { tasks = JSON.parse(ev.target.result); saveAndRender(); };
         reader.readAsText(e.target.files[0]);
-    });
+    };
 
-    function escHtml(str) {
-        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-    }
+    function escHtml(str) { return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
 });
