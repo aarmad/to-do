@@ -199,6 +199,37 @@
                     <div class="clock-ampm">--</div>
                 </div>
 
+                <!-- Progress & Stats (Grouped) -->
+                <div class="progress-container">
+                    <svg class="circle-svg" viewBox="0 0 160 160">
+                        <circle class="circle-bg" cx="80" cy="80" r="70" />
+                        <circle class="circle-progress" id="progressBar" cx="80" cy="80" r="70" />
+                        <text class="circle-pct-text" id="circlePct" x="80" y="88" text-anchor="middle">0%</text>
+                    </svg>
+                    <div class="progress-label" id="progressText">0/0 éléments</div>
+                    <div class="stats-mini" id="statsDetail">0 en cours • 0 terminées</div>
+                </div>
+
+                <!-- Daily Target -->
+                <div class="target-card">
+                    <div class="target-header">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="3">
+                            <path
+                                d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                        </svg>
+                        <span>Objectif du jour</span>
+                    </div>
+                    <div class="target-input-row">
+                        <input type="number" id="dailyTargetInput" value="5" min="1" class="target-input-neo">
+                        <span>tâches</span>
+                    </div>
+                    <div class="target-progress-bar">
+                        <div id="targetFill" class="target-fill"></div>
+                    </div>
+                    <div id="targetText" class="target-text">0/5 terminées</div>
+                </div>
+
                 <!-- Add Task -->
                 <div class="add-task-card">
                     <div class="add-task-header">
@@ -332,25 +363,6 @@
                     </div>
                 </div>
 
-                <!-- Daily Target -->
-                <div class="target-card">
-                    <div class="target-header">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="3">
-                            <path
-                                d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                        </svg>
-                        <span>Objectif du jour</span>
-                    </div>
-                    <div class="target-input-row">
-                        <input type="number" id="dailyTargetInput" value="5" min="1" class="target-input-neo">
-                        <span>tâches</span>
-                    </div>
-                    <div class="target-progress-bar">
-                        <div id="targetFill" class="target-fill"></div>
-                    </div>
-                    <div id="targetText" class="target-text">0/5 terminées</div>
-                </div>
 
                 <!-- Scratchpad -->
                 <div class="scratchpad-card">
@@ -365,17 +377,9 @@
                     <textarea id="scratchpad" class="scratch-area" placeholder="Notes temporaires..."></textarea>
                 </div>
 
-                <!-- Progress -->
-                <div class="progress-container">
-                    <svg class="circle-svg" viewBox="0 0 160 160">
-                        <circle class="circle-bg" cx="80" cy="80" r="70" />
-                        <circle class="circle-progress" id="progressBar" cx="80" cy="80" r="70" />
-                        <text class="circle-pct-text" id="circlePct" x="80" y="88" text-anchor="middle">0%</text>
-                    </svg>
-                    <div class="progress-label" id="progressText">0/0 éléments</div>
-                    <div class="stats-mini" id="statsDetail">0 en cours • 0 terminées</div>
-
-                    <div class="data-actions-neo">
+                <!-- Data Actions -->
+                <div class="progress-container" style="padding: 12px; min-height: auto;">
+                    <div class="data-actions-neo" style="justify-content: center;">
                         <button id="exportBtn" class="mini-btn-neo" title="Exporter JSON">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -383,7 +387,6 @@
                                 <polyline points="7 10 12 15 17 10" />
                                 <line x1="12" y1="15" x2="12" y2="3" />
                             </svg>
-                            Export
                         </button>
                         <button id="importBtn" class="mini-btn-neo" title="Importer JSON">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -392,7 +395,6 @@
                                 <polyline points="17 8 12 3 7 8" />
                                 <line x1="12" y1="3" x2="12" y2="15" />
                             </svg>
-                            Import
                         </button>
                         <input type="file" id="importFile" style="display:none" accept=".json">
                     </div>
