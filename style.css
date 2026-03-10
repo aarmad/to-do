@@ -277,8 +277,7 @@ body.dark-mode .task-note-input {
     cursor: pointer;
 }
 
-.tag-input-neo,
-.date-input-neo {
+.tag-input-neo, .date-input-neo {
     flex: 1;
     width: 0;
     min-width: 0;
@@ -293,11 +292,34 @@ body.dark-mode .task-note-input {
     font-family: inherit;
 }
 
+/* Inline time/duration inputs in the add-task form */
+.task-options--time {
+    display: flex;
+    gap: 12px;
+    padding-top: 10px;
+    border-top: 1.5px dashed #ddd;
+    margin-top: 4px;
+}
+body.dark-mode .task-options--time { border-color: #333; }
+
+.time-input-neo {
+    width: 100%;
+    border: none;
+    border-bottom: 2px solid var(--accent);
+    padding: 5px 0;
+    font-size: 13px;
+    font-weight: 700;
+    background: transparent;
+    color: var(--text);
+    outline: none;
+    font-family: inherit;
+}
+
 .input-group-neo {
     display: flex;
     flex-direction: column;
     flex: 1;
-    min-width: 0;
+    gap: 4px;
 }
 
 .mini-label {
@@ -305,7 +327,7 @@ body.dark-mode .task-note-input {
     font-weight: 800;
     text-transform: uppercase;
     color: var(--muted);
-    margin-bottom: -4px;
+    user-select: none;
 }
 
 .label-picker-row {
@@ -948,43 +970,57 @@ body.dark-mode .subtask-section {
 /* ── Planning / Timeline View ── */
 .timeline-container {
     display: none;
-    gap: 16px;
+    gap: 10px;
     overflow-x: auto;
     padding-bottom: 16px;
-    scroll-snap-type: x mandatory;
+    scroll-snap-type: x proximity;
 }
 
 .timeline-container.active {
     display: flex;
+    align-items: flex-start;
 }
 
 .timeline-column {
-    flex: 0 0 260px;
-    background: #111;
-    border: 1px solid #222;
-    border-radius: 14px;
-    padding: 12px;
-    min-height: 400px;
+    flex: 0 0 200px;          /* Compact width */
+    background: var(--card);
+    border: var(--border);
+    border-radius: 12px;
+    padding: 10px;
+    min-height: 200px;
     scroll-snap-align: start;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 6px;
+    box-shadow: 3px 3px 0 #111;
+}
+
+body.dark-mode .timeline-column {
+    box-shadow: 3px 3px 0 #444;
 }
 
 .timeline-hour {
     font-size: 11px;
-    font-weight: 800;
-    color: #555;
-    padding-bottom: 8px;
-    border-bottom: 1px solid #222;
-    margin-bottom: 4px;
+    font-weight: 900;
+    color: var(--planning-color);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
     display: flex;
     justify-content: space-between;
+    align-items: center;
 }
 
-.timeline-hour span {
-    color: var(--planning-color);
+/* Compact task cards inside timeline */
+.timeline-column .task-item {
+    padding: 8px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    cursor: grab;
 }
+
+.timeline-column .task-actions { display: none; }
 
 .time-badge {
     background: #1e1e30;
@@ -999,9 +1035,10 @@ body.dark-mode .subtask-section {
 }
 
 .duration-badge {
-    color: #888;
+    color: #aaa;
     font-size: 9px;
     font-weight: 600;
+    margin-left: 2px;
 }
 
 /* ── Subtask cancel ── */

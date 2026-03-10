@@ -118,10 +118,9 @@
                             </div>
                             <div class="list-sorting">
                                 <select id="sortSelect" class="sort-select">
-                                    <option value="priority">Priorité</option>
+                                    <option value="created">Créé le</option>
                                     <option value="date">Date</option>
                                     <option value="alpha">Alphabétique</option>
-                                    <option value="created">Créé le</option>
                                 </select>
                                 <div class="toggle-view">
                                     <button class="view-btn active" id="listViewBtn" title="Vue Liste">
@@ -262,16 +261,9 @@
 
                     <div class="task-options">
                         <select id="statusInput" class="select-neo">
-                            <option value="todo">
-                                À faire
-                            </option>
+                            <option value="todo">À faire</option>
                             <option value="active">En cours</option>
                             <option value="completed">Terminée</option>
-                        </select>
-                        <select id="priorityInput" class="select-neo">
-                            <option value="low">Priorité Basse</option>
-                            <option value="medium" selected>Priorité Moyenne</option>
-                            <option value="high">Priorité Haute</option>
                         </select>
                     </div>
 
@@ -280,14 +272,14 @@
                         <input type="date" id="dueDateInput" class="date-input-neo">
                     </div>
 
-                    <div class="task-options" style="border-top: 1px solid #eee; padding-top: 8px;">
+                    <div class="task-options task-options--time">
                         <div class="input-group-neo">
-                            <label class="mini-label">Début :</label>
-                            <input type="time" id="startTimeInput" class="date-input-neo">
+                            <label class="mini-label" for="startTimeInput">⏰ Début</label>
+                            <input type="time" id="startTimeInput" class="time-input-neo">
                         </div>
                         <div class="input-group-neo">
-                            <label class="mini-label">Durée (min) :</label>
-                            <input type="number" id="durationInput" class="tag-input-neo" placeholder="Ex: 30" min="5" step="5">
+                            <label class="mini-label" for="durationInput">⏱ Durée (min)</label>
+                            <input type="number" id="durationInput" class="time-input-neo" placeholder="30" min="5" step="5">
                         </div>
                     </div>
 
