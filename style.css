@@ -970,29 +970,30 @@ body.dark-mode .subtask-section {
 /* ── Planning / Timeline View ── */
 .timeline-container {
     display: none;
-    gap: 10px;
-    overflow-x: auto;
     padding-bottom: 16px;
-    scroll-snap-type: x proximity;
+    width: 100%;
+    overflow-x: auto;
 }
 
 .timeline-container.active {
-    display: flex;
-    align-items: flex-start;
+    /* CSS Grid: colonnes qui remplissent proprement l'écran, min 130px chacune */
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 10px;
+    align-items: start;
 }
 
 .timeline-column {
-    flex: 0 0 200px;          /* Compact width */
     background: var(--card);
     border: var(--border);
     border-radius: 12px;
     padding: 10px;
-    min-height: 200px;
-    scroll-snap-align: start;
+    min-height: 120px;    /* Plus besoin de hauteur fixe énorme */
     display: flex;
     flex-direction: column;
     gap: 6px;
     box-shadow: 3px 3px 0 #111;
+    transition: border-color 0.15s;
 }
 
 body.dark-mode .timeline-column {
