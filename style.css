@@ -58,7 +58,7 @@
 
 /* Quand la title bar est visible, pousser le contenu vers le bas */
 body.electron-mode {
-    padding-top: 38px;
+    padding-top: 58px;   /* 38px title bar + 20px de respiration */
 }
 
 /* ── Update Banner ────────────────────────────────────────────────── */
