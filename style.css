@@ -6,13 +6,14 @@
 .electron-title-bar {
     position: fixed;
     top: 0; left: 0; right: 0;
-    height: 38px;
-    background: #111;
+    height: 42px;
+    background: var(--bg, #f5f5f0);
+    border-bottom: 3px solid #111;
     display: flex;
     align-items: center;
     z-index: 99999;
     user-select: none;
-    border-bottom: 2px solid #222;
+    font-family: 'Outfit', sans-serif;
 }
 
 .etb-drag {
@@ -20,46 +21,79 @@
     height: 100%;
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 0 14px;
-    -webkit-app-region: drag;  /* Permet de déplacer la fenêtre en tirant cette zone */
+    gap: 10px;
+    padding: 0 16px;
+    -webkit-app-region: drag;
     cursor: default;
 }
 
 .etb-name {
-    font-size: 12px;
-    font-weight: 800;
-    color: white;
-    letter-spacing: 1px;
+    font-size: 13px;
+    font-weight: 900;
+    color: var(--text, #111);
+    letter-spacing: 1.5px;
     text-transform: uppercase;
+}
+
+/* Petit checkmark néo-brutalist SVG dans la drag zone */
+.etb-drag svg {
+    flex-shrink: 0;
+}
+.etb-drag svg path,
+.etb-drag svg polyline {
+    stroke: #111;
+}
+body.dark-mode .etb-drag svg path,
+body.dark-mode .etb-drag svg polyline {
+    stroke: #fff;
 }
 
 .etb-controls {
     display: flex;
-    -webkit-app-region: no-drag;  /* Les boutons ne doivent PAS être draggables */
+    height: 100%;
+    -webkit-app-region: no-drag;
+    border-left: 3px solid #111;
 }
 
 .etb-btn {
-    width: 46px;
-    height: 38px;
+    width: 50px;
+    height: 100%;
     border: none;
+    border-left: 1px solid #eee;
     background: transparent;
-    color: #aaa;
-    font-size: 16px;
+    color: var(--text, #111);
+    font-size: 14px;
+    font-weight: 900;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background 0.15s, color 0.15s;
-    font-family: 'Courier New', monospace;
+    transition: background 0.12s, color 0.12s;
+    font-family: 'Outfit', 'Courier New', monospace;
 }
-.etb-btn:hover        { background: #333; color: white; }
-.etb-close:hover      { background: #e81123 !important; color: white; }
+
+.etb-btn:first-child { border-left: none; }
+
+.etb-min:hover  { background: #111; color: #fff; }
+.etb-max:hover  { background: #111; color: #fff; }
+.etb-close:hover { background: #ff4444; color: #fff; border-color: #ff4444; }
+
+/* Dark mode */
+body.dark-mode .electron-title-bar {
+    background: #111;
+    border-bottom-color: #333;
+}
+body.dark-mode .etb-controls { border-left-color: #333; }
+body.dark-mode .etb-btn      { border-left-color: #222; color: #fff; }
+body.dark-mode .etb-name     { color: #fff; }
+body.dark-mode .etb-min:hover,
+body.dark-mode .etb-max:hover { background: #fff; color: #111; }
 
 /* Quand la title bar est visible, pousser le contenu vers le bas */
 body.electron-mode {
-    padding-top: 58px;   /* 38px title bar + 20px de respiration */
+    padding-top: 62px; /* 42px title bar + 20px de respiration */
 }
+
 
 /* ── Update Banner ────────────────────────────────────────────────── */
 .update-banner {

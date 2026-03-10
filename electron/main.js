@@ -38,7 +38,7 @@ function createWindow() {
         minHeight: 600,
         frame:     false,          // On utilise notre propre title bar
         transparent: false,
-        backgroundColor: '#f5f5f0',
+        backgroundColor: '#f5f5f0',   // Couleur bg du site (évite le flash blanc)
         titleBarStyle: 'hidden',
         webPreferences: {
             preload:          path.join(__dirname, 'preload.js'),
