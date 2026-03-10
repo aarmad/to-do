@@ -787,3 +787,104 @@ document.addEventListener('DOMContentLoaded', () => {
         r.readAsText(e.target.files[0]);
     };
 });
+
+// ══════════════════════════════════════════════════════════════════════════════
+// ELECTRON INTEGRATION — s'active uniquement si l'API est disponible
+// (ignoré dans un navigateur web normal)
+// ══════════════════════════════════════════════════════════════════════════════
+(function initElectron() {
+    const api = window.electronAPI;
+    if (!api) return; // Pas dans Electron — ne rien faire
+
+    // ── Activer le mode Electron (title bar + padding) ──────────────────────
+    document.body.classList.add('electron-mode');
+
+    // ── Afficher la title bar ───────────────────────────────────────────────
+    const titleBar = document.getElementById('electronTitleBar');
+    if (titleBar) titleBar.style.display = 'flex';
+
+    // ── Boutons de contrôle de fenêtre ──────────────────────────────────────
+    document.getElementById('etbMin')  ?.addEventListener('click', () => api.minimize());
+    document.getElementById('etbClose')?.addEventListener('click', () => api.close());
+
+    const etbMax   = document.getElementById('etbMax');
+    const updateMaxIcon = (isMax) => { if (etbMax) etbMax.textContent = isMax ? '❐' : '□'; };
+
+    etbMax?.addEventListener('click', async () => {
+        await api.maximize();
+        updateMaxIcon(await api.isMaximized());
+    });
+
+    // Sync icône quand la fenêtre est maximisée/restaurée via double-clic barre
+    api.onWindowMaximized(updateMaxIcon);
+    api.isMaximized().then(updateMaxIcon);
+
+    // ── Overrider les notifications web → notifications natives Electron ─────
+    // La fonction showNotification de script.js utilisera ceci automatiquement
+    // via checkOverdueTasks() qui appelle showToast + Notification
+    // On surcharge directement l'API Notification si disponible dans Electron
+    const originalCheckOverdue = window._checkOverdue;
+    // Patch global pour notifications overdue
+    window._sendNativeNotification = (title, body) => {
+        api.showNotification(title, body);
+    };
+
+    // ── Version dans le titre ───────────────────────────────────────────────
+    api.getVersion().then(v => {
+        const el = document.querySelector('.etb-name');
+        if (el) el.textContent = `Neo-List v${v}`;
+    });
+
+    // ── Auto-updater UI ─────────────────────────────────────────────────────
+    const banner          = document.getElementById('updateBanner');
+    const updateMsg       = document.getElementById('updateMsg');
+    const installBtn      = document.getElementById('updateInstallBtn');
+    const progressWrap    = document.getElementById('updateProgress');
+    const updateFill      = document.getElementById('updateFill');
+
+    function showBanner(msg, showInstall = false, showProgress = false) {
+        if (!banner) return;
+        banner.style.display = 'flex';
+        document.body.classList.add('has-update-banner');
+        if (updateMsg)    updateMsg.textContent = msg;
+        if (installBtn)   installBtn.style.display = showInstall   ? 'inline-block' : 'none';
+        if (progressWrap) progressWrap.style.display = showProgress ? 'block'       : 'none';
+    }
+
+    function hideBanner() {
+        if (banner) banner.style.display = 'none';
+        document.body.classList.remove('has-update-banner');
+    }
+
+    api.onUpdateChecking(() => {
+        showBanner('🔍 Vérification des mises à jour...');
+        setTimeout(hideBanner, 3000);
+    });
+
+    api.onUpdateAvailable(info => {
+        showBanner(`⬇️ Mise à jour v${info.version} en téléchargement...`, false, true);
+    });
+
+    api.onUpdateNotAvailable(() => {
+        showBanner('✅ Application à jour !');
+        setTimeout(hideBanner, 3000);
+    });
+
+    api.onUpdateProgress(progress => {
+        const pct = Math.round(progress.percent);
+        if (updateFill)   updateFill.style.width = pct + '%';
+        if (updateMsg)    updateMsg.textContent = `⬇️ Téléchargement... ${pct}%`;
+    });
+
+    api.onUpdateDownloaded(info => {
+        showBanner(`✅ v${info.version} prête ! Redémarrez pour l'installer.`, true, false);
+    });
+
+    api.onUpdateError(msg => {
+        showBanner(`⚠️ Erreur de mise à jour : ${msg}`);
+        setTimeout(hideBanner, 5000);
+    });
+
+    installBtn?.addEventListener('click', () => api.installUpdate());
+})();
+

@@ -1,0 +1,43 @@
+name: Build & Release Desktop App
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'   # Déclenché sur les tags de version (ex: v1.0.1)
+  workflow_dispatch:  # Permet de déclencher manuellement
+
+jobs:
+  build:
+    name: Build ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest]
+        # Pour multi-plateforme, ajouter: ubuntu-latest, macos-latest
+
+    steps:
+      - name: 📥 Checkout branche desktop
+        uses: actions/checkout@v4
+        with:
+          ref: desktop
+
+      - name: 🟢 Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: 📦 Installer les dépendances
+        run: npm ci
+
+      - name: 🔨 Builder l'application Electron
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: npm run release
+
+      - name: 📤 Upload artifacts (debug)
+        uses: actions/upload-artifact@v4
+        with:
+          name: neo-list-${{ matrix.os }}
+          path: dist/
+          if-no-files-found: warn

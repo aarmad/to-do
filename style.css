@@ -1,4 +1,119 @@
+/* ══════════════════════════════════════════════════════════════
+   Electron — Custom Title Bar & Update Banner
+   ══════════════════════════════════════════════════════════════ */
+
+/* Zone de drag pour déplacer la fenêtre */
+.electron-title-bar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 38px;
+    background: #111;
+    display: flex;
+    align-items: center;
+    z-index: 99999;
+    user-select: none;
+    border-bottom: 2px solid #222;
+}
+
+.etb-drag {
+    flex: 1;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 14px;
+    -webkit-app-region: drag;  /* Permet de déplacer la fenêtre en tirant cette zone */
+    cursor: default;
+}
+
+.etb-name {
+    font-size: 12px;
+    font-weight: 800;
+    color: white;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.etb-controls {
+    display: flex;
+    -webkit-app-region: no-drag;  /* Les boutons ne doivent PAS être draggables */
+}
+
+.etb-btn {
+    width: 46px;
+    height: 38px;
+    border: none;
+    background: transparent;
+    color: #aaa;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, color 0.15s;
+    font-family: 'Courier New', monospace;
+}
+.etb-btn:hover        { background: #333; color: white; }
+.etb-close:hover      { background: #e81123 !important; color: white; }
+
+/* Quand la title bar est visible, pousser le contenu vers le bas */
+body.electron-mode {
+    padding-top: 38px;
+}
+
+/* ── Update Banner ────────────────────────────────────────────────── */
+.update-banner {
+    position: fixed;
+    top: 38px;
+    left: 0; right: 0;
+    background: #7289da;
+    color: white;
+    padding: 8px 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 12px;
+    font-weight: 700;
+    z-index: 99998;
+    animation: slideIn 0.3s ease;
+}
+
+body.electron-mode.has-update-banner { padding-top: 74px; }
+
+.update-action-btn {
+    background: white;
+    color: #7289da;
+    border: none;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-weight: 800;
+    font-size: 11px;
+    cursor: pointer;
+    transition: 0.15s;
+    font-family: inherit;
+}
+.update-action-btn:hover { opacity: 0.85; }
+
+.update-progress-bar {
+    flex: 1;
+    height: 6px;
+    background: rgba(255,255,255,0.3);
+    border-radius: 3px;
+    overflow: hidden;
+    max-width: 200px;
+}
+.update-fill {
+    height: 100%;
+    background: white;
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Suite — Variables CSS
+   ══════════════════════════════════════════════════════════════ */
 :root {
+
     --bg: #f5f5f0;
     --text: #111111;
     --card: #ffffff;

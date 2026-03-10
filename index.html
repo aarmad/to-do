@@ -4,6 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CSP for Electron sandbox -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'none';">
     <title>Neo-List | Ta mission du jour</title>
     <link rel="icon" type="image/svg+xml"
         href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><rect width='24' height='24' rx='6' fill='black'/><path d='M7 12l3 3 7-7' stroke='white' stroke-width='2.5' fill='none' stroke-linecap='round'/></svg>">
@@ -13,6 +15,29 @@
 </head>
 
 <body>
+
+    <!-- ─── Custom Title Bar (Electron only — caché sur navigateur) ─────────── -->
+    <div id="electronTitleBar" class="electron-title-bar" style="display:none">
+        <div class="etb-drag">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+            <span class="etb-name">Neo-List</span>
+        </div>
+        <div class="etb-controls">
+            <button id="etbMin"   class="etb-btn etb-min" title="Réduire">&#8211;</button>
+            <button id="etbMax"   class="etb-btn etb-max" title="Agrandir">&#9633;</button>
+            <button id="etbClose" class="etb-btn etb-close" title="Fermer">&#215;</button>
+        </div>
+    </div>
+
+    <!-- ─── Update Banner (Electron only) ─────────────────────────────────────── -->
+    <div id="updateBanner" class="update-banner" style="display:none">
+        <span id="updateMsg">Mise à jour disponible...</span>
+        <button id="updateInstallBtn" class="update-action-btn" style="display:none">Installer et redémarrer</button>
+        <div id="updateProgress" class="update-progress-bar" style="display:none">
+            <div id="updateFill" class="update-fill"></div>
+        </div>
+    </div>
+
     <div class="container">
         <main class="dashboard-grid">
             <!-- Left: Main content -->

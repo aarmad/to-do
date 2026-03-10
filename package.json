@@ -1,0 +1,89 @@
+{
+  "name": "neo-list",
+  "version": "1.0.0",
+  "description": "Neo-List — Application de gestion de tâches (néo-brutaliste)",
+  "main": "electron/main.js",
+  "author": {
+    "name": "aarmad",
+    "email": ""
+  },
+  "homepage": "https://github.com/aarmad/to-do",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "build:win": "electron-builder --win --x64",
+    "build:all": "electron-builder --win --linux --mac",
+    "release": "electron-builder --publish always"
+  },
+  "devDependencies": {
+    "electron": "^29.3.0",
+    "electron-builder": "^24.13.3"
+  },
+  "dependencies": {
+    "electron-updater": "^6.3.9"
+  },
+  "build": {
+    "appId": "com.aarmad.neo-list",
+    "productName": "Neo-List",
+    "copyright": "Copyright © 2025 aarmad",
+    "directories": {
+      "output": "dist",
+      "buildResources": "assets"
+    },
+    "files": [
+      "electron/**/*",
+      "index.html",
+      "style.css",
+      "script.js",
+      "assets/**/*",
+      "!dist/**/*",
+      "!node_modules/**/*"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        },
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "assets/icon.png",
+      "requestedExecutionLevel": "asInvoker"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowElevation": true,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Neo-List",
+      "installerLanguages": ["fr_FR", "en_US"],
+      "language": "1036"
+    },
+    "linux": {
+      "target": ["AppImage", "deb"],
+      "icon": "assets/icon.png",
+      "category": "Office"
+    },
+    "mac": {
+      "target": ["dmg"],
+      "icon": "assets/icon.png",
+      "category": "public.app-category.productivity"
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "aarmad",
+        "repo": "to-do",
+        "releaseType": "release"
+      }
+    ],
+    "electronDownload": {
+      "mirror": "https://npmmirror.com/mirrors/electron/"
+    }
+  }
+}
