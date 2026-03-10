@@ -972,32 +972,37 @@ body.dark-mode .subtask-section {
     display: none;
     padding-bottom: 16px;
     width: 100%;
-    overflow-x: auto;
 }
 
 .timeline-container.active {
-    /* CSS Grid: colonnes qui remplissent proprement l'écran, min 130px chacune */
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-    gap: 10px;
+    /* Au moins 200px par colonne, au max 1fr — ça remplit l'écran sans overflow bizarre */
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
     align-items: start;
 }
 
 .timeline-column {
     background: var(--card);
     border: var(--border);
-    border-radius: 12px;
-    padding: 10px;
-    min-height: 120px;    /* Plus besoin de hauteur fixe énorme */
+    border-radius: 14px;
+    padding: 12px;
+    min-height: 80px;
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 8px;
     box-shadow: 3px 3px 0 #111;
-    transition: border-color 0.15s;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    overflow: hidden;   /* Empêche les dépassements */
 }
 
 body.dark-mode .timeline-column {
     box-shadow: 3px 3px 0 #444;
+}
+
+.timeline-column.drag-over {
+    border-color: var(--planning-color) !important;
+    box-shadow: 3px 3px 0 var(--planning-color) !important;
 }
 
 .timeline-hour {
@@ -1006,22 +1011,56 @@ body.dark-mode .timeline-column {
     color: var(--planning-color);
     text-transform: uppercase;
     letter-spacing: 1px;
-    padding-bottom: 6px;
-    border-bottom: 1px solid var(--border);
+    padding-bottom: 8px;
+    border-bottom: 2px dashed rgba(114,137,218,0.25);
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-/* Compact task cards inside timeline */
+/* Cards compactes dans la vue planning */
 .timeline-column .task-item {
     padding: 8px 10px;
-    border-radius: 8px;
-    font-size: 12px;
+    border-radius: 10px;
     cursor: grab;
+    min-height: auto;
 }
 
+/* Texte sur UNE SEULE ligne avec “…” */
+.timeline-column .task-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 13px;
+    max-width: 100%;
+    display: block;
+}
+
+/* Cacher les boutons d’actions et la note dans la vue planning */
 .timeline-column .task-actions { display: none; }
+.timeline-column .task-note    { display: none; }
+.timeline-column .subtask-section { display: none !important; }
+
+/* Badges réduits */
+.timeline-column .task-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    overflow: hidden;
+}
+
+.timeline-column .tag-badge,
+.timeline-column .due-date-badge,
+.timeline-column .time-badge {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Cacher la couleur dot et badges secondaires pour garder les cartes propres */
+.timeline-column .recurring-badge { display: none; }
+
 
 .time-badge {
     background: #1e1e30;
