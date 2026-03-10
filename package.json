@@ -34,12 +34,12 @@
       "buildResources": "assets"
     },
     "files": [
-      "electron/**/*",
-      "index.html",
-      "style.css",
-      "script.js",
-      "assets/**/*",
-      "!dist/**/*"
+      "**/*",
+      "!dist/**/*",
+      "!.github/**/*",
+      "!.gitignore",
+      "!README*",
+      "!*.md"
     ],
     "win": {
       "sign": null,

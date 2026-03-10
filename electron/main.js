@@ -1,5 +1,5 @@
 /**
- * Neo-List — Electron Main Process
+ * Neo-List — Electron Main Process (v2)
  * Gère : fenêtre principale, barre de titre custom, mises à jour auto (GitHub Releases)
  */
 
@@ -9,22 +9,23 @@ const {
     ipcMain,
     shell,
     Notification,
-    nativeTheme,
     Menu,
 } = require('electron');
-const { autoUpdater } = require('electron-updater');
 const path = require('path');
 
-// ── Dev mode detection ────────────────────────────────────────────────────────
+// ── Dev mode ──────────────────────────────────────────────────────────────────
 const isDev = process.argv.includes('--dev') || !app.isPackaged;
 
-// ── Auto-updater config ───────────────────────────────────────────────────────
-autoUpdater.autoDownload    = true;   // Télécharge dès qu'une update est dispo
-autoUpdater.autoInstallOnAppQuit = true; // Installe à la fermeture
-
-// En dev, forcer la vérification quand même (utile pour tester)
-if (isDev) {
-    autoUpdater.forceDevUpdateConfig = true;
+// ── electron-updater en chargement OPTIONNEL ──────────────────────────────────
+// Si absent du bundle (build mal configuré), l'app fonctionne quand même.
+let autoUpdater = null;
+try {
+    autoUpdater = require('electron-updater').autoUpdater;
+    autoUpdater.autoDownload         = true;
+    autoUpdater.autoInstallOnAppQuit = true;
+    console.log('[updater] electron-updater chargé.');
+} catch (e) {
+    console.warn('[updater] electron-updater non disponible :', e.message);
 }
 
 // ── Main window reference ─────────────────────────────────────────────────────
@@ -36,9 +37,9 @@ function createWindow() {
         height:    860,
         minWidth:  900,
         minHeight: 600,
-        frame:     false,          // On utilise notre propre title bar
+        frame:     false,
         transparent: false,
-        backgroundColor: '#f5f5f0',   // Couleur bg du site (évite le flash blanc)
+        backgroundColor: '#f5f5f0',
         titleBarStyle: 'hidden',
         webPreferences: {
             preload:          path.join(__dirname, 'preload.js'),
@@ -47,40 +48,37 @@ function createWindow() {
             sandbox:          true,
         },
         icon: path.join(__dirname, '../assets/icon.png'),
-        show: false,               // Ne montre pas jusqu'à ready-to-show
+        show: false,
     });
 
-    // Charge l'app web
     mainWindow.loadFile(path.join(__dirname, '../index.html'));
 
-    // Afficher la fenêtre proprement (sans flash blanc)
     mainWindow.once('ready-to-show', () => {
         mainWindow.show();
-        // Vérifier les updates après 3s (évite de bloquer le démarrage)
-        if (!isDev) {
+        // Vérifier les updates 3s après le démarrage (production seulement)
+        if (!isDev && autoUpdater) {
             setTimeout(() => autoUpdater.checkForUpdatesAndNotify(), 3000);
         }
     });
 
-    // Ouvrir les liens <a target="_blank"> dans le navigateur système
+    // Ouvrir les liens externes dans le navigateur système
     mainWindow.webContents.setWindowOpenHandler(({ url }) => {
         shell.openExternal(url);
         return { action: 'deny' };
     });
 
-    // Dev tools en mode développement
+    // DevTools uniquement en mode dev
     if (isDev) {
         mainWindow.webContents.openDevTools({ mode: 'detach' });
     }
 
-    mainWindow.on('closed', () => { mainWindow = null; });
+    mainWindow.on('closed',    () => { mainWindow = null; });
     mainWindow.on('maximize',   () => mainWindow?.webContents.send('window:maximized', true));
     mainWindow.on('unmaximize', () => mainWindow?.webContents.send('window:maximized', false));
 }
 
 // ── App lifecycle ─────────────────────────────────────────────────────────────
 app.whenReady().then(() => {
-    // Désactiver le menu natif (on a le nôtre)
     Menu.setApplicationMenu(null);
     createWindow();
 });
@@ -94,11 +92,11 @@ app.on('activate', () => {
 });
 
 // ── IPC : contrôles fenêtre ───────────────────────────────────────────────────
-ipcMain.handle('window:minimize',  () => mainWindow?.minimize());
-ipcMain.handle('window:maximize',  () => {
+ipcMain.handle('window:minimize',     () => mainWindow?.minimize());
+ipcMain.handle('window:maximize',     () => {
     mainWindow?.isMaximized() ? mainWindow?.unmaximize() : mainWindow?.maximize();
 });
-ipcMain.handle('window:close',     () => mainWindow?.close());
+ipcMain.handle('window:close',        () => mainWindow?.close());
 ipcMain.handle('window:is-maximized', () => mainWindow?.isMaximized() ?? false);
 
 // ── IPC : infos app ───────────────────────────────────────────────────────────
@@ -119,33 +117,35 @@ ipcMain.handle('notification:show', (_, { title, body, silent }) => {
     return false;
 });
 
-// ── IPC : mise à jour manuelle ────────────────────────────────────────────────
-ipcMain.handle('update:check',   () => autoUpdater.checkForUpdates());
-ipcMain.handle('update:install', () => autoUpdater.quitAndInstall(false, true));
+// ── IPC : mises à jour (gardées si autoUpdater disponible) ───────────────────
+ipcMain.handle('update:check',   () => autoUpdater?.checkForUpdates()   ?? null);
+ipcMain.handle('update:install', () => autoUpdater?.quitAndInstall(false, true) ?? null);
 
 // ── Auto-updater events → renderer ───────────────────────────────────────────
-autoUpdater.on('checking-for-update', () =>
-    mainWindow?.webContents.send('update:checking'));
+// Tout est conditionné à autoUpdater !== null
+if (autoUpdater) {
+    autoUpdater.on('checking-for-update', () =>
+        mainWindow?.webContents.send('update:checking'));
 
-autoUpdater.on('update-available', (info) =>
-    mainWindow?.webContents.send('update:available', info));
+    autoUpdater.on('update-available', (info) =>
+        mainWindow?.webContents.send('update:available', info));
 
-autoUpdater.on('update-not-available', (info) =>
-    mainWindow?.webContents.send('update:not-available', info));
+    autoUpdater.on('update-not-available', (info) =>
+        mainWindow?.webContents.send('update:not-available', info));
 
-autoUpdater.on('download-progress', (progress) =>
-    mainWindow?.webContents.send('update:progress', progress));
+    autoUpdater.on('download-progress', (progress) =>
+        mainWindow?.webContents.send('update:progress', progress));
 
-autoUpdater.on('update-downloaded', (info) => {
-    mainWindow?.webContents.send('update:downloaded', info);
-    // Notification native à la fin du téléchargement
-    if (Notification.isSupported()) {
-        new Notification({
-            title: 'Neo-List — Mise à jour prête',
-            body:  `Version ${info.version} téléchargée. Elle sera installée à la prochaine fermeture.`,
-        }).show();
-    }
-});
+    autoUpdater.on('update-downloaded', (info) => {
+        mainWindow?.webContents.send('update:downloaded', info);
+        if (Notification.isSupported()) {
+            new Notification({
+                title: 'Neo-List — Mise à jour prête',
+                body:  `Version ${info.version} téléchargée. Elle sera installée à la fermeture.`,
+            }).show();
+        }
+    });
 
-autoUpdater.on('error', (err) =>
-    mainWindow?.webContents.send('update:error', err.message));
+    autoUpdater.on('error', (err) =>
+        mainWindow?.webContents.send('update:error', err.message));
+}
