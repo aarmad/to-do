@@ -11,6 +11,7 @@
     --todo-color: #888;
     --active-color: #ffbb33;
     --done-color: #00C851;
+    --planning-color: #7289da;
     --transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
@@ -290,6 +291,21 @@ body.dark-mode .task-note-input {
     color: var(--text);
     outline: none;
     font-family: inherit;
+}
+
+.input-group-neo {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+}
+
+.mini-label {
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: -4px;
 }
 
 .label-picker-row {
@@ -927,6 +943,82 @@ body.dark-mode .subtask-section {
 
 .board-column .task-item:hover {
     opacity: 0.9;
+}
+
+/* ── Planning / Timeline View ── */
+.timeline-container {
+    display: none;
+    gap: 16px;
+    overflow-x: auto;
+    padding-bottom: 16px;
+    scroll-snap-type: x mandatory;
+}
+
+.timeline-container.active {
+    display: flex;
+}
+
+.timeline-column {
+    flex: 0 0 260px;
+    background: #111;
+    border: 1px solid #222;
+    border-radius: 14px;
+    padding: 12px;
+    min-height: 400px;
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.timeline-hour {
+    font-size: 11px;
+    font-weight: 800;
+    color: #555;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #222;
+    margin-bottom: 4px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.timeline-hour span {
+    color: var(--planning-color);
+}
+
+.time-badge {
+    background: #1e1e30;
+    color: #7289da;
+    font-size: 9px;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-weight: 900;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.duration-badge {
+    color: #888;
+    font-size: 9px;
+    font-weight: 600;
+}
+
+/* ── Subtask cancel ── */
+.mini-cancel-sub {
+    background: none;
+    border: none;
+    color: #444;
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    padding: 0 4px;
+    transition: 0.2s;
+}
+
+.mini-cancel-sub:hover {
+    color: #888;
+    transform: rotate(90deg);
 }
 
 /* ── Pomodoro Settings & More ── */

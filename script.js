@@ -1,101 +1,111 @@
 /* ===========================
-   Neo-List — script.js (v6)
+   Neo-List — script.js (v7)
    =========================== */
 document.addEventListener('DOMContentLoaded', () => {
 
     // ── DOM refs ──────────────────────────────────────────────────────────────
-    const taskInput = document.getElementById('taskInput');
-    const taskNote = document.getElementById('taskNote');
-    const statusInput = document.getElementById('statusInput');
-    const priorityInput = document.getElementById('priorityInput');
-    const tagInput = document.getElementById('tagInput');
-    const dueDateInput = document.getElementById('dueDateInput');
+    const taskInput      = document.getElementById('taskInput');
+    const taskNote       = document.getElementById('taskNote');
+    const statusInput    = document.getElementById('statusInput');
+    const priorityInput  = document.getElementById('priorityInput');
+    const tagInput       = document.getElementById('tagInput');
+    const dueDateInput   = document.getElementById('dueDateInput');
+    const startTimeInput = document.getElementById('startTimeInput');
+    const durationInput  = document.getElementById('durationInput');
     const recurringInput = document.getElementById('recurringInput');
-    const addTaskBtn = document.getElementById('addTaskBtn');
-    const taskList = document.getElementById('taskList');
+    const addTaskBtn     = document.getElementById('addTaskBtn');
+    const taskList       = document.getElementById('taskList');
     const boardContainer = document.getElementById('boardContainer');
-    const progressBar = document.getElementById('progressBar');
-    const progressText = document.getElementById('progressText');
-    const circlePct = document.getElementById('circlePct');
-    const statsDetail = document.getElementById('statsDetail');
-    const clockEl = document.getElementById('clock');
-    const clearBtn = document.getElementById('clearTasks');
-    const markAllBtn = document.getElementById('markAllDone');
-    const themeToggle = document.getElementById('themeToggle');
-    const themeIcon = document.getElementById('themeIcon');
-    const filterBtns = document.querySelectorAll('.filter-btn');
-    const searchInput = document.getElementById('searchInput');
-    const clearSearch = document.getElementById('clearSearch');
-    const sortSelect = document.getElementById('sortSelect');
-    const listViewBtn = document.getElementById('listViewBtn');
-    const boardViewBtn = document.getElementById('boardViewBtn');
-    const exportBtn = document.getElementById('exportBtn');
-    const importBtn = document.getElementById('importBtn');
-    const importFile = document.getElementById('importFile');
-    const shortcutsBtn = document.getElementById('shortcutsBtn');
+    const timelineContainer = document.getElementById('timelineContainer');
+    
+    const progressBar    = document.getElementById('progressBar');
+    const progressText   = document.getElementById('progressText');
+    const circlePct      = document.getElementById('circlePct');
+    const statsDetail    = document.getElementById('statsDetail');
+    const clockEl        = document.getElementById('clock');
+    const clearBtn       = document.getElementById('clearTasks');
+    const markAllBtn     = document.getElementById('markAllDone');
+    const themeToggle    = document.getElementById('themeToggle');
+    const themeIcon      = document.getElementById('themeIcon');
+    const filterBtns     = document.querySelectorAll('.filter-btn');
+    const searchInput    = document.getElementById('searchInput');
+    const clearSearch    = document.getElementById('clearSearch');
+    const sortSelect     = document.getElementById('sortSelect');
+    
+    // View View Toggles
+    const listViewBtn     = document.getElementById('listViewBtn');
+    const boardViewBtn    = document.getElementById('boardViewBtn');
+    const timelineViewBtn = document.getElementById('timelineViewBtn');
+    
+    const exportBtn      = document.getElementById('exportBtn');
+    const importBtn      = document.getElementById('importBtn');
+    const importFile     = document.getElementById('importFile');
+    const shortcutsBtn   = document.getElementById('shortcutsBtn');
     const shortcutsModal = document.getElementById('shortcutsModal');
-    const closeModal = document.getElementById('closeModal');
-    const emptyState = document.getElementById('emptyState');
-    const colorDots = document.querySelectorAll('.color-dot');
-
+    const closeModal     = document.getElementById('closeModal');
+    const emptyState     = document.getElementById('emptyState');
+    const colorDots      = document.querySelectorAll('.color-dot');
+    
     // Pomodoro refs
-    const pomoTimer = document.getElementById('pomoTimer');
-    const pomoStart = document.getElementById('pomoStart');
-    const pomoReset = document.getElementById('pomoReset');
-    const pomoModes = document.querySelectorAll('.pomo-mode');
-    const pomoSettingsBtn = document.getElementById('pomoSettingsBtn');
-    const pomoSettings = document.getElementById('pomoSettings');
-    const pomoWorkInput = document.getElementById('pomoWorkInput');
-    const pomoBreakInput = document.getElementById('pomoBreakInput');
+    const pomoTimer        = document.getElementById('pomoTimer');
+    const pomoStart        = document.getElementById('pomoStart');
+    const pomoReset        = document.getElementById('pomoReset');
+    const pomoModes        = document.querySelectorAll('.pomo-mode');
+    const pomoSettingsBtn  = document.getElementById('pomoSettingsBtn');
+    const pomoSettings     = document.getElementById('pomoSettings');
+    const pomoWorkInput    = document.getElementById('pomoWorkInput');
+    const pomoBreakInput   = document.getElementById('pomoBreakInput');
 
     // Daily Target refs
     const dailyTargetInput = document.getElementById('dailyTargetInput');
-    const targetFill = document.getElementById('targetFill');
-    const targetText = document.getElementById('targetText');
+    const targetFill       = document.getElementById('targetFill');
+    const targetText       = document.getElementById('targetText');
 
     // Scratchpad refs
-    const scratchpad = document.getElementById('scratchpad');
+    const scratchpad       = document.getElementById('scratchpad');
 
     // Stat chips
-    const statTodo = document.getElementById('statTodo');
+    const statTodo   = document.getElementById('statTodo');
     const statActive = document.getElementById('statActive');
-    const statDone = document.getElementById('statDone');
+    const statDone   = document.getElementById('statDone');
 
     // ── State ─────────────────────────────────────────────────────────────────
-    let tasks = JSON.parse(localStorage.getItem('neoTasks')) || [];
+    let tasks         = JSON.parse(localStorage.getItem('neoTasks'))  || [];
     let currentFilter = 'all';
-    let searchQuery = '';
-    let currentView = localStorage.getItem('neoView') || 'list';
+    let searchQuery   = '';
+    let currentView   = localStorage.getItem('neoView')  || 'list';
     let selectedColor = '#ff4444';
 
     // Pomodoro settings
-    let pomoWorkTime = parseInt(localStorage.getItem('pomoWork')) || 25;
+    let pomoWorkTime  = parseInt(localStorage.getItem('pomoWork'))  || 25;
     let pomoBreakTime = parseInt(localStorage.getItem('pomoBreak')) || 5;
     let pomoInterval;
-    let pomoTimeLeft = pomoWorkTime * 60;
+    let pomoTimeLeft  = pomoWorkTime * 60;
     let pomoIsRunning = false;
-    let pomoCurrentMode = 'work'; // 'work' or 'break'
+    let pomoCurrentMode = 'work'; 
 
     // Daily Target
     let dailyTarget = parseInt(localStorage.getItem('neoDailyTarget')) || 5;
 
     // ── SVG Strings ───────────────────────────────────────────────────────────
     const SVG = {
-        sun: `<path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42M12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10z"/>`,
+        sun:  `<path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42M12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10z"/>`,
         moon: `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>`,
-        todo: `<circle cx="12" cy="12" r="5" fill="none" stroke="#888" stroke-width="2.5"/>`,
-        active: `<polygon points="5 3 19 12 5 21 5 3" fill="#ffbb33"/>`,
+        todo:      `<circle cx="12" cy="12" r="5" fill="none" stroke="#888" stroke-width="2.5"/>`,
+        active:    `<polygon points="5 3 19 12 5 21 5 3" fill="#ffbb33"/>`,
         completed: `<polyline points="20 6 9 17 4 12" stroke="#00C851" stroke-width="3" stroke-linecap="round" fill="none"/>`,
-        pin: `<path d="M21 10V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l2-1.14"/><path d="m7.5 4.27 9 5.15"/><polyline points="3.29 7 12 12 20.71 7"/><line x1="12" y1="22" x2="12" y2="12"/>`,
-        expand: `<polyline points="6 9 12 15 18 9"/>`,
-        trash: `<polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/>`,
-        check: `<polyline points="20 6 9 17 4 12"/>`,
-        note: `<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>`,
-        hourglass: `<path d="M5 2h14"/><path d="M5 22h14"/><path d="M19 2l-7 7-7-7"/><path d="M5 22l7-7 7 7"/>`,
-        repeat: `<polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>`,
-        copy: `<rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>`,
-        play: `<polygon points="5 3 19 12 5 21 5 3" fill="currentColor"/>`,
-        pause: `<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>`
+        pin:      `<path d="M21 10V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l2-1.14"/><path d="m7.5 4.27 9 5.15"/><polyline points="3.29 7 12 12 20.71 7"/><line x1="12" y1="22" x2="12" y2="12"/>`,
+        expand:   `<polyline points="6 9 12 15 18 9"/>`,
+        trash:    `<polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/>`,
+        check:    `<polyline points="20 6 9 17 4 12"/>`,
+        note:     `<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>`,
+        hourglass:`<path d="M5 2h14"/><path d="M5 22h14"/><path d="M19 2l-7 7-7-7"/><path d="M5 22l7-7 7 7"/>`,
+        repeat:   `<polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>`,
+        copy:     `<rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>`,
+        play:     `<polygon points="5 3 19 12 5 21 5 3" fill="currentColor"/>`,
+        pause:    `<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>`,
+        calendar: `<rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>`,
+        clock:    `<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>`,
     };
 
     // ── Init ──────────────────────────────────────────────────────────────────
@@ -103,7 +113,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setInterval(updateClock, 1000);
     applyTheme(localStorage.getItem('neoTheme') === 'dark');
     applyView(currentView);
-
+    
     // Load Pomodoro settings
     pomoWorkInput.value = pomoWorkTime;
     pomoBreakInput.value = pomoBreakTime;
@@ -119,7 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderTasks();
 
     // ── Listeners ─────────────────────────────────────────────────────────────
-
+    
     // Color Picker
     colorDots.forEach(dot => {
         dot.addEventListener('click', () => {
@@ -147,27 +157,31 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!text) { showToast('Écris une tâche d\'abord !'); return; }
 
         const task = {
-            id: Date.now(),
+            id:        Date.now(),
             text,
-            note: taskNote.value.trim(),
-            status: statusInput.value,
-            priority: priorityInput.value,
-            tag: tagInput.value.trim() || 'Général',
-            dueDate: dueDateInput.value || null,
+            note:      taskNote.value.trim(),
+            status:    statusInput.value,
+            priority:  priorityInput.value,
+            tag:       tagInput.value.trim() || 'Général',
+            dueDate:   dueDateInput.value   || null,
+            startTime: startTimeInput.value || null,
+            duration:  durationInput.value  || null,
             recurring: recurringInput.value || null,
-            color: selectedColor,
-            pinned: false,
-            subtasks: [],
-            expanded: false,
+            color:     selectedColor,
+            pinned:    false,
+            subtasks:  [],
+            expanded:  false,
             createdAt: new Date().toISOString(),
         };
 
         tasks.push(task);
         saveAndRender();
         taskInput.value = '';
-        taskNote.value = '';
-        tagInput.value = '';
+        taskNote.value  = '';
+        tagInput.value  = '';
         dueDateInput.value = '';
+        startTimeInput.value = '';
+        durationInput.value = '';
         recurringInput.value = '';
         showToast('Tâche ajoutée !');
     }
@@ -230,15 +244,19 @@ document.addEventListener('DOMContentLoaded', () => {
     // View Toggle
     listViewBtn.addEventListener('click', () => { applyView('list'); renderTasks(); });
     boardViewBtn.addEventListener('click', () => { applyView('board'); renderTasks(); });
+    timelineViewBtn.addEventListener('click', () => { applyView('timeline'); renderTasks(); });
 
     function applyView(view) {
         currentView = view;
         localStorage.setItem('neoView', view);
-        const isList = view === 'list';
-        listViewBtn.classList.toggle('active', isList);
-        boardViewBtn.classList.toggle('active', !isList);
-        taskList.style.display = isList ? 'flex' : 'none';
-        boardContainer.classList.toggle('active', !isList);
+        
+        listViewBtn.classList.toggle('active', view === 'list');
+        boardViewBtn.classList.toggle('active', view === 'board');
+        timelineViewBtn.classList.toggle('active', view === 'timeline');
+        
+        taskList.style.display = view === 'list' ? 'flex' : 'none';
+        boardContainer.classList.toggle('active', view === 'board');
+        timelineContainer.classList.toggle('active', view === 'timeline');
     }
 
     // ── Pomodoro Logic ───────────────────────────────────────────────────────
@@ -261,14 +279,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     pomoIsRunning = false;
                     pomoStart.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">${SVG.play}</svg>`;
                     showToast(pomoCurrentMode === 'work' ? 'Temps écoulé ! Pause ?' : 'Pause finie ! Au boulot !');
-                    // Play a soft beep
                     const context = new (window.AudioContext || window.webkitAudioContext)();
                     const osc = context.createOscillator();
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(440, context.currentTime);
-                    osc.connect(context.destination);
-                    osc.start();
-                    osc.stop(context.currentTime + 0.3);
+                    osc.type = 'sine'; osc.frequency.setValueAtTime(440, context.currentTime);
+                    osc.connect(context.destination); osc.start(); osc.stop(context.currentTime + 0.3);
                 }
             }, 1000);
             pomoStart.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">${SVG.pause}</svg>`;
@@ -344,7 +358,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function initColumnDrop() {
-        document.querySelectorAll('.board-column').forEach(col => {
+        document.querySelectorAll('.board-column, .timeline-column').forEach(col => {
             col.addEventListener('dragover', (e) => {
                 e.preventDefault();
                 col.classList.add('drag-over');
@@ -354,12 +368,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 e.preventDefault();
                 col.classList.remove('drag-over');
                 const id = parseInt(e.dataTransfer.getData('task-id'));
-                const newStatus = col.dataset.status;
                 const task = tasks.find(t => t.id === id);
-                if (task && task.status !== newStatus) {
-                    task.status = newStatus;
-                    task.completed = newStatus === 'completed';
-                    if (task.completed) launchConfetti();
+                if (!task) return;
+                
+                // If dropping into a Kanban column
+                if (col.classList.contains('board-column')) {
+                    const newStatus = col.dataset.status;
+                    if (task.status !== newStatus) {
+                        task.status = newStatus;
+                        task.completed = newStatus === 'completed';
+                        if (task.completed) launchConfetti();
+                        saveAndRender();
+                    }
+                } 
+                // If dropping into a Planning/Timeline column
+                else if (col.classList.contains('timeline-column')) {
+                    const hour = col.dataset.hour;
+                    if (hour === 'none') {
+                        task.startTime = null;
+                    } else {
+                        task.startTime = hour + ":00";
+                    }
                     saveAndRender();
                 }
             });
@@ -375,17 +404,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ── Render ────────────────────────────────────────────────────────────────
     function renderTasks() {
-        const list = document.getElementById('taskList');
-        list.innerHTML = '';
+        taskList.innerHTML = '';
         boardContainer.innerHTML = '';
+        timelineContainer.innerHTML = '';
 
         const filtered = getFiltered();
         emptyState.style.display = filtered.length === 0 ? 'flex' : 'none';
 
         if (currentView === 'list') {
-            filtered.forEach(t => list.appendChild(createTaskEl(t)));
-        } else {
+            filtered.forEach(t => taskList.appendChild(createTaskEl(t)));
+        } else if (currentView === 'board') {
             buildBoard(filtered);
+            initColumnDrop();
+        } else {
+            buildTimeline(filtered);
             initColumnDrop();
         }
         updateUI();
@@ -394,8 +426,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function getFiltered() {
         const raw = tasks.filter(t => {
             const matchFilter = currentFilter === 'all' || t.status === currentFilter;
-            const matchSearch = !searchQuery ||
-                t.text.toLowerCase().includes(searchQuery) ||
+            const matchSearch = !searchQuery || 
+                t.text.toLowerCase().includes(searchQuery) || 
                 t.tag.toLowerCase().includes(searchQuery) ||
                 (t.note && t.note.toLowerCase().includes(searchQuery));
             return matchFilter && matchSearch;
@@ -406,9 +438,9 @@ document.addEventListener('DOMContentLoaded', () => {
         raw.sort((a, b) => {
             if (a.pinned !== b.pinned) return b.pinned ? 1 : -1;
             if (sort === 'priority') return pScore[b.priority] - pScore[a.priority];
-            if (sort === 'alpha') return a.text.localeCompare(b.text);
-            if (sort === 'date') return (a.dueDate || '9999') < (b.dueDate || '9999') ? -1 : 1;
-            if (sort === 'created') return b.id - a.id;
+            if (sort === 'alpha')    return a.text.localeCompare(b.text);
+            if (sort === 'date')     return (a.dueDate || '9999') < (b.dueDate || '9999') ? -1 : 1;
+            if (sort === 'created')  return b.id - a.id;
             return 0;
         });
         return raw;
@@ -416,9 +448,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function buildBoard(tasks) {
         const columns = [
-            { status: 'todo', label: 'À faire', icon: SVG.todo, color: '#888' },
-            { status: 'active', label: 'En cours', icon: SVG.active, color: '#ffbb33' },
-            { status: 'completed', label: 'Terminées', icon: SVG.completed, color: '#00C851' },
+            { status: 'todo',      label: 'À faire',    icon: SVG.todo,      color: '#888' },
+            { status: 'active',    label: 'En cours',   icon: SVG.active,    color: '#ffbb33' },
+            { status: 'completed', label: 'Terminées',  icon: SVG.completed, color: '#00C851' },
         ];
 
         columns.forEach(col => {
@@ -437,22 +469,58 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    function buildTimeline(tasks) {
+        // Trello-like Planning for Time-boxing
+        // Columns for hours + one for unscheduled
+        const hours = ['none', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23'];
+        
+        hours.forEach(hour => {
+            const hourTasks = tasks.filter(t => {
+                if (hour === 'none') return !t.startTime;
+                return t.startTime && t.startTime.startsWith(hour);
+            });
+            
+            // Skip empty columns except 'none' and standard work hours
+            if (hourTasks.length === 0 && hour !== 'none' && (parseInt(hour) < 8 || parseInt(hour) > 19)) return;
+
+            const div = document.createElement('div');
+            div.className = 'timeline-column';
+            div.dataset.hour = hour;
+            const label = hour === 'none' ? 'Non planifié' : hour + 'h00';
+            const icon = hour === 'none' ? SVG.calendar : SVG.clock;
+            
+            div.innerHTML = `
+                <div class="timeline-hour">
+                    <span>${label}</span>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">${icon}</svg>
+                </div>`;
+            hourTasks.forEach(t => div.appendChild(createTaskEl(t, true)));
+            timelineContainer.appendChild(div);
+        });
+    }
+
     function createTaskEl(task, compact = false) {
         const li = document.createElement('li');
         li.className = `task-item${task.status === 'completed' ? ' completed' : ''}${task.pinned ? ' pinned' : ''}`;
-        li.dataset.id = task.id;
+        li.dataset.id     = task.id;
         li.dataset.status = task.status;
         initDragAndDrop(li, task.id);
 
-        const pBadge = `<span class="priority-badge priority-${task.priority}">${task.priority.toUpperCase()}</span>`;
+        const pBadge  = `<span class="priority-badge priority-${task.priority}">${task.priority.toUpperCase()}</span>`;
         const tagBadge = `<span class="tag-badge">#${task.tag}</span>`;
-
+        
         let dateHtml = '';
         if (task.dueDate) {
             const due = new Date(task.dueDate + 'T00:00:00');
-            const today = new Date(); today.setHours(0, 0, 0, 0);
+            const today = new Date(); today.setHours(0,0,0,0);
             const overdue = due < today && task.status !== 'completed';
             dateHtml = `<span class="due-date-badge ${overdue ? 'overdue' : ''}"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">${SVG.hourglass}</svg>${due.toLocaleDateString('fr-FR')}</span>`;
+        }
+        
+        let timeHtml = '';
+        if (task.startTime) {
+            const dur = task.duration ? `<span class="duration-badge">(${task.duration}m)</span>` : '';
+            timeHtml = `<span class="time-badge"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">${SVG.clock}</svg>${task.startTime}${dur}</span>`;
         }
 
         const colorDot = task.color ? `<span class="color-label" style="background:${task.color}"></span>` : '';
@@ -476,7 +544,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="task-content">
               <span class="task-text" contenteditable="true">${escHtml(task.text)}</span>
               ${noteHtml}
-              <div class="task-meta">${colorDot}${pBadge}${tagBadge}${subCount}${dateHtml}${recurBadge}</div>
+              <div class="task-meta">${colorDot}${pBadge}${tagBadge}${timeHtml}${subCount}${dateHtml}${recurBadge}</div>
             </div>
             <div class="task-actions">
               <button class="task-icon-btn duplicate-btn" title="Dupliquer"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">${SVG.copy}</svg></button>
@@ -489,11 +557,12 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="subtask-list">${subsHtml}</div>
             <div class="subtask-add-row">
               <input class="subtask-input-mini" type="text" placeholder="Ajouter une sous-tâche...">
-              <button class="mini-add-btn">+</button>
+              <button class="mini-add-btn" title="Ajouter">+</button>
+              <button class="mini-cancel-sub" title="Fermer">×</button>
             </div>
           </div>`;
 
-        // Event listeners (re-init)
+        // Event listeners
         li.querySelector('.status-cycle').onclick = (e) => {
             e.stopPropagation();
             const order = ['todo', 'active', 'completed'];
@@ -505,7 +574,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         li.querySelector('.duplicate-btn').onclick = (e) => {
             e.stopPropagation();
-            const clone = { ...task, id: Date.now(), text: task.text + ' (Copie)', expanded: false };
+            const clone = {...task, id: Date.now(), text: task.text + ' (Copie)', expanded: false};
             tasks.push(clone);
             saveAndRender();
             showToast('Tâche dupliquée !');
@@ -536,7 +605,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (val && val !== task.text) { task.text = val; saveTasks(); }
         };
 
-        // Subtasks logic...
+        // Subtasks logic
         li.querySelectorAll('.subtask-item').forEach(item => {
             const idx = +item.dataset.idx;
             item.querySelector('.subtask-checkbox').onclick = () => {
@@ -551,7 +620,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         const subInput = li.querySelector('.subtask-input-mini');
-        li.querySelector('.mini-add-btn').onclick = () => {
+        const addSub = () => {
             const val = subInput.value.trim();
             if (val) {
                 if (!task.subtasks) task.subtasks = [];
@@ -559,12 +628,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 saveAndRender();
             }
         };
+        li.querySelector('.mini-add-btn').onclick = addSub;
+        subInput.onkeydown = (e) => { if (e.key === 'Enter') addSub(); };
+        
+        // CANCEL subtask creation
+        li.querySelector('.mini-cancel-sub').onclick = () => {
+            subInput.value = '';
+            task.expanded = false;
+            saveTasks();
+            renderTasks();
+        };
 
         return li;
     }
 
     function saveAndRender() { saveTasks(); renderTasks(); }
-    function saveTasks() { localStorage.setItem('neoTasks', JSON.stringify(tasks)); }
+    function saveTasks()     { localStorage.setItem('neoTasks', JSON.stringify(tasks)); }
 
     function updateUI() {
         const total = tasks.length;
@@ -572,17 +651,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const active = tasks.filter(t => t.status === 'active').length;
         const todo = tasks.filter(t => t.status === 'todo').length;
         const pct = total === 0 ? 0 : Math.round((done / total) * 100);
-
+        
         progressBar.style.strokeDashoffset = 440 - (pct / 100) * 440;
         circlePct.textContent = `${pct}%`;
         progressText.textContent = `${done}/${total} éléments`;
         statsDetail.textContent = `${active} en cours • ${done} terminées`;
-
+        
         statTodo.textContent = todo;
         statActive.textContent = active;
         statDone.textContent = done;
 
-        // Daily Target Update
         const targetPercent = Math.min((done / dailyTarget) * 100, 100);
         targetFill.style.width = `${targetPercent}%`;
         targetText.textContent = `${done}/${dailyTarget} terminées`;
@@ -612,12 +690,10 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => el.classList.remove('show'), 2500);
     }
 
-    // Modal
     shortcutsBtn.onclick = () => shortcutsModal.style.display = 'flex';
-    closeModal.onclick = () => shortcutsModal.style.display = 'none';
+    closeModal.onclick   = () => shortcutsModal.style.display = 'none';
     window.onclick = (e) => { if (e.target === shortcutsModal) shortcutsModal.style.display = 'none'; };
 
-    // Export/Import
     exportBtn.onclick = () => {
         const a = document.createElement('a');
         a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(tasks, null, 2));
