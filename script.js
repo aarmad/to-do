@@ -1,5 +1,5 @@
 /* ===========================
-   Neo-List — script.js (v8)
+   Neo-List — script.js (v9)
    =========================== */
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -44,6 +44,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const emptyState     = document.getElementById('emptyState');
     const colorDots      = document.querySelectorAll('.color-dot');
 
+    // Edit Modal
+    const editModal      = document.getElementById('editModal');
+    const closeEditModal = document.getElementById('closeEditModal');
+    const cancelEditBtn  = document.getElementById('cancelEditBtn');
+    const saveEditBtn    = document.getElementById('saveEditBtn');
+    const editText       = document.getElementById('editText');
+    const editNote       = document.getElementById('editNote');
+    const editStatus     = document.getElementById('editStatus');
+    const editTag        = document.getElementById('editTag');
+    const editDueDate    = document.getElementById('editDueDate');
+    const editStartTime  = document.getElementById('editStartTime');
+    const editDuration   = document.getElementById('editDuration');
+    const editColorPicker = document.getElementById('editColorPicker');
+
     // Pomodoro
     const pomoTimer       = document.getElementById('pomoTimer');
     const pomoStart       = document.getElementById('pomoStart');
@@ -54,15 +68,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const pomoWorkInput   = document.getElementById('pomoWorkInput');
     const pomoBreakInput  = document.getElementById('pomoBreakInput');
 
-    // Daily Target
     const dailyTargetInput = document.getElementById('dailyTargetInput');
     const targetFill       = document.getElementById('targetFill');
     const targetText       = document.getElementById('targetText');
-
-    // Scratchpad
-    const scratchpad = document.getElementById('scratchpad');
-
-    // Stats chips
+    const scratchpad       = document.getElementById('scratchpad');
     const statTodo   = document.getElementById('statTodo');
     const statActive = document.getElementById('statActive');
     const statDone   = document.getElementById('statDone');
@@ -73,6 +82,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let searchQuery   = '';
     let currentView   = localStorage.getItem('neoView') || 'list';
     let selectedColor = '#ff4444';
+    let editingTaskId = null;   // tracks which task is being edited
+    let editSelectedColor = '#ff4444';
 
     let pomoWorkTime    = parseInt(localStorage.getItem('pomoWork'))  || 25;
     let pomoBreakTime   = parseInt(localStorage.getItem('pomoBreak')) || 5;
@@ -80,8 +91,10 @@ document.addEventListener('DOMContentLoaded', () => {
     let pomoTimeLeft    = pomoWorkTime * 60;
     let pomoIsRunning   = false;
     let pomoCurrentMode = 'work';
+    let dailyTarget     = parseInt(localStorage.getItem('neoDailyTarget')) || 5;
 
-    let dailyTarget = parseInt(localStorage.getItem('neoDailyTarget')) || 5;
+    // Notification tracking — don't re-fire for same task in same minute
+    const notifiedTasks = new Set();
 
     // ── SVG ─────────────────────────────────────────────────────────────────
     const SVG = {
@@ -106,6 +119,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // ── Init ─────────────────────────────────────────────────────────────────
     updateClock();
     setInterval(updateClock, 1000);
+    // Refresh planning view every minute (moves the now-cursor)
+    setInterval(() => { if (currentView === 'timeline') renderTasks(); }, 60000);
+
     applyTheme(localStorage.getItem('neoTheme') === 'dark');
     applyView(currentView);
 
@@ -117,9 +133,18 @@ document.addEventListener('DOMContentLoaded', () => {
     dailyTargetInput.value = dailyTarget;
     scratchpad.value = localStorage.getItem('neoScratchpad') || '';
 
+    // Request notification permission once
+    if ('Notification' in window && Notification.permission === 'default') {
+        Notification.requestPermission();
+    }
+
+    // Check overdue tasks every 60 seconds
+    setInterval(checkOverdueTasks, 60000);
+    checkOverdueTasks(); // initial check
+
     renderTasks();
 
-    // ── Color picker ─────────────────────────────────────────────────────────
+    // ── Color picker (create form) ────────────────────────────────────────────
     colorDots.forEach(dot => {
         dot.addEventListener('click', () => {
             colorDots.forEach(d => d.classList.remove('selected'));
@@ -128,15 +153,22 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // ── Color picker (edit modal) ─────────────────────────────────────────────
+    editColorPicker.querySelectorAll('.color-dot').forEach(dot => {
+        dot.addEventListener('click', () => {
+            editColorPicker.querySelectorAll('.color-dot').forEach(d => d.classList.remove('selected'));
+            dot.classList.add('selected');
+            editSelectedColor = dot.dataset.color;
+        });
+    });
+
     // ── Theme ────────────────────────────────────────────────────────────────
     themeToggle.addEventListener('click', toggleTheme);
-
     function toggleTheme() {
         const dark = !document.body.classList.contains('dark-mode');
         applyTheme(dark);
         localStorage.setItem('neoTheme', dark ? 'dark' : 'light');
     }
-
     function applyTheme(dark) {
         document.body.classList.toggle('dark-mode', dark);
         themeIcon.innerHTML = dark ? SVG.sun : SVG.moon;
@@ -147,27 +179,24 @@ document.addEventListener('DOMContentLoaded', () => {
         const text = taskInput.value.trim();
         if (!text) { showToast('Écris une tâche d\'abord !'); return; }
 
-        const task = {
+        tasks.push({
             id:        Date.now(),
             text,
-            note:      taskNote   ? taskNote.value.trim()   : '',
+            note:      taskNote?.value.trim()     || '',
             status:    statusInput.value,
-            tag:       tagInput.value.trim() || 'Général',
-            dueDate:   dueDateInput.value    || null,
-            startTime: startTimeInput ? startTimeInput.value || null : null,
-            duration:  durationInput  ? durationInput.value  || null : null,
-            recurring: recurringInput ? recurringInput.value || null : null,
+            tag:       tagInput.value.trim()       || 'Général',
+            dueDate:   dueDateInput.value          || null,
+            startTime: startTimeInput?.value       || null,
+            duration:  durationInput?.value        || null,
+            recurring: recurringInput?.value       || null,
             color:     selectedColor,
             pinned:    false,
             subtasks:  [],
             expanded:  false,
             createdAt: new Date().toISOString(),
-        };
+        });
 
-        tasks.push(task);
         saveAndRender();
-
-        // Clear form
         taskInput.value = '';
         if (taskNote)       taskNote.value = '';
         if (tagInput)       tagInput.value = '';
@@ -175,7 +204,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (startTimeInput) startTimeInput.value = '';
         if (durationInput)  durationInput.value = '';
         if (recurringInput) recurringInput.value = '';
-
         taskInput.focus();
         showToast('Tâche ajoutée !');
     }
@@ -185,13 +213,93 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); addTask(); }
     });
 
+    // ── Edit Modal ───────────────────────────────────────────────────────────
+    function openEditModal(taskId) {
+        const task = tasks.find(t => t.id === taskId);
+        if (!task) return;
+        editingTaskId   = taskId;
+        editSelectedColor = task.color || '';
+
+        editText.value      = task.text;
+        editNote.value      = task.note || '';
+        editStatus.value    = task.status;
+        editTag.value       = task.tag || '';
+        editDueDate.value   = task.dueDate || '';
+        editStartTime.value = task.startTime || '';
+        editDuration.value  = task.duration || '';
+
+        // Update color picker
+        editColorPicker.querySelectorAll('.color-dot').forEach(dot => {
+            dot.classList.toggle('selected', dot.dataset.color === editSelectedColor);
+        });
+
+        editModal.style.display = 'flex';
+        editText.focus();
+    }
+
+    function closeEdit() {
+        editModal.style.display = 'none';
+        editingTaskId = null;
+    }
+
+    function saveEdit() {
+        const task = tasks.find(t => t.id === editingTaskId);
+        if (!task) return;
+
+        const newText = editText.value.trim();
+        if (!newText) { showToast('Le titre ne peut pas être vide.'); return; }
+
+        task.text      = newText;
+        task.note      = editNote.value.trim();
+        task.status    = editStatus.value;
+        task.tag       = editTag.value.trim() || 'Général';
+        task.dueDate   = editDueDate.value   || null;
+        task.startTime = editStartTime.value || null;
+        task.duration  = editDuration.value  || null;
+        task.color     = editSelectedColor;
+
+        closeEdit();
+        saveAndRender();
+        showToast('Tâche mise à jour !');
+    }
+
+    saveEditBtn.addEventListener('click', saveEdit);
+    closeEditModal.addEventListener('click', closeEdit);
+    cancelEditBtn.addEventListener('click', closeEdit);
+    editModal.addEventListener('click', e => { if (e.target === editModal) closeEdit(); });
+    editText.addEventListener('keydown', e => { if (e.key === 'Enter') saveEdit(); });
+
+    // ── Overdue Notifications ─────────────────────────────────────────────────
+    function checkOverdueTasks() {
+        const now   = new Date();
+        const hhmm  = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+
+        tasks.forEach(task => {
+            if (!task.startTime || task.status === 'completed') return;
+            if (task.startTime > hhmm) return; // not started yet
+
+            const key = `${task.id}-${task.startTime}`;
+            if (notifiedTasks.has(key)) return;
+            notifiedTasks.add(key);
+
+            // Check if it's actually overdue (past start time, not done)
+            const isOverdue = task.startTime < hhmm;
+            if (!isOverdue) return;
+
+            const msg = `⏰ Tâche en retard : "${task.text}"`;
+            if ('Notification' in window && Notification.permission === 'granted') {
+                new Notification('Neo-List', { body: msg, icon: '' });
+            }
+            showToast(msg);
+        });
+    }
+
     // ── Search ───────────────────────────────────────────────────────────────
     searchInput.addEventListener('input', e => {
         searchQuery = e.target.value.toLowerCase();
         clearSearch.style.display = searchQuery ? 'flex' : 'none';
         renderTasks();
     });
-
     clearSearch.addEventListener('click', () => {
         searchInput.value = ''; searchQuery = '';
         clearSearch.style.display = 'none';
@@ -200,63 +308,40 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ── Keyboard Shortcuts ───────────────────────────────────────────────────
     document.addEventListener('keydown', e => {
-        const active = document.activeElement;
+        const active   = document.activeElement;
         const isTyping = active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.contentEditable === 'true');
 
-        // Escape — close modal / collapse
         if (e.key === 'Escape') {
-            if (shortcutsModal.style.display === 'flex') {
-                shortcutsModal.style.display = 'none';
-            }
+            if (editModal.style.display === 'flex')      closeEdit();
+            if (shortcutsModal.style.display === 'flex') shortcutsModal.style.display = 'none';
             return;
         }
-
-        if (isTyping) return; // Don't fire shortcuts when user is typing
+        if (isTyping) return;
 
         switch (e.key.toLowerCase()) {
-            case 'n':
-                e.preventDefault();
-                taskInput.focus();
-                break;
-            case '/':
-                e.preventDefault();
-                searchInput.focus();
-                break;
-            case 't':
-                e.preventDefault();
-                toggleTheme();
-                break;
+            case 'n': e.preventDefault(); taskInput.focus(); break;
+            case '/': e.preventDefault(); searchInput.focus(); break;
+            case 't': e.preventDefault(); toggleTheme(); break;
             case 'v':
                 e.preventDefault();
-                // Cycle through views: list → board → timeline → list
-                if (currentView === 'list')     { applyView('board');     }
-                else if (currentView === 'board') { applyView('timeline'); }
-                else                              { applyView('list');     }
-                renderTasks();
-                break;
-            case '?':
-            case 'k':
+                applyView(currentView === 'list' ? 'board' : currentView === 'board' ? 'timeline' : 'list');
+                renderTasks(); break;
+            case '?': case 'k':
                 e.preventDefault();
                 shortcutsModal.style.display = shortcutsModal.style.display === 'flex' ? 'none' : 'flex';
                 break;
-            case '1':
-                filterBtns.forEach(b => b.classList.remove('active'));
-                document.querySelector('[data-filter="all"]')?.classList.add('active');
-                currentFilter = 'all'; renderTasks(); break;
-            case '2':
-                filterBtns.forEach(b => b.classList.remove('active'));
-                document.querySelector('[data-filter="todo"]')?.classList.add('active');
-                currentFilter = 'todo'; renderTasks(); break;
-            case '3':
-                filterBtns.forEach(b => b.classList.remove('active'));
-                document.querySelector('[data-filter="active"]')?.classList.add('active');
-                currentFilter = 'active'; renderTasks(); break;
-            case '4':
-                filterBtns.forEach(b => b.classList.remove('active'));
-                document.querySelector('[data-filter="completed"]')?.classList.add('active');
-                currentFilter = 'completed'; renderTasks(); break;
+            case '1': setFilter('all');       break;
+            case '2': setFilter('todo');      break;
+            case '3': setFilter('active');    break;
+            case '4': setFilter('completed'); break;
         }
     });
+
+    function setFilter(f) {
+        filterBtns.forEach(b => b.classList.remove('active'));
+        document.querySelector(`[data-filter="${f}"]`)?.classList.add('active');
+        currentFilter = f; renderTasks();
+    }
 
     // ── Filters ──────────────────────────────────────────────────────────────
     filterBtns.forEach(btn => {
@@ -267,24 +352,20 @@ document.addEventListener('DOMContentLoaded', () => {
             renderTasks();
         });
     });
-
     sortSelect.addEventListener('change', renderTasks);
 
     // ── Bulk actions ─────────────────────────────────────────────────────────
     markAllBtn.addEventListener('click', () => {
         tasks = tasks.map(t => ({ ...t, status: 'completed' }));
-        saveAndRender();
-        showToast('Toutes les tâches terminées !');
+        saveAndRender(); showToast('Toutes les tâches terminées !');
     });
 
     let clearTimeout_;
     clearBtn.addEventListener('click', () => {
         if (clearBtn.textContent.includes('SÛR')) {
-            tasks = [];
-            saveAndRender();
+            tasks = []; saveAndRender();
             clearBtn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">${SVG.trash}</svg> EFFACER TOUT`;
-            clearTimeout(clearTimeout_);
-            showToast('Liste vidée.');
+            clearTimeout(clearTimeout_); showToast('Liste vidée.');
         } else {
             clearBtn.textContent = 'SÛR ?';
             clearTimeout_ = setTimeout(() => {
@@ -323,10 +404,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 pomoTimeLeft--;
                 updatePomoDisplay();
                 if (pomoTimeLeft <= 0) {
-                    clearInterval(pomoInterval);
-                    pomoIsRunning = false;
+                    clearInterval(pomoInterval); pomoIsRunning = false;
                     pomoStart.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">${SVG.play}</svg>`;
-                    showToast(pomoCurrentMode === 'work' ? 'Temps écoulé ! Pause ?' : 'Pause finie ! Au boulot !');
+                    const msg = pomoCurrentMode === 'work' ? 'Temps écoulé ! Pause ?' : 'Pause finie ! Au boulot !';
+                    showToast(msg);
+                    if ('Notification' in window && Notification.permission === 'granted') {
+                        new Notification('Pomodoro', { body: msg });
+                    }
                     try {
                         const ctx = new (window.AudioContext || window.webkitAudioContext)();
                         const osc = ctx.createOscillator();
@@ -343,7 +427,7 @@ document.addEventListener('DOMContentLoaded', () => {
     pomoReset.addEventListener('click', () => {
         clearInterval(pomoInterval); pomoIsRunning = false;
         const activeMode = document.querySelector('.pomo-mode.active');
-        pomoTimeLeft = (activeMode && activeMode.textContent.toLowerCase().includes('travail') ? pomoWorkTime : pomoBreakTime) * 60;
+        pomoTimeLeft = (activeMode?.textContent.toLowerCase().includes('travail') ? pomoWorkTime : pomoBreakTime) * 60;
         updatePomoDisplay();
         pomoStart.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">${SVG.play}</svg>`;
     });
@@ -407,21 +491,17 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (newStatus === 'completed') launchConfetti();
                         saveAndRender();
                     }
-                } else if (col.classList.contains('timeline-column')) {
-                    const hour = col.dataset.hour;
-                    task.startTime = hour === 'none' ? null : hour + ':00';
+                } else {
+                    task.startTime = col.dataset.hour === 'none' ? null : col.dataset.hour + ':00';
                     saveAndRender();
                 }
             });
         });
     }
 
-    // ── Confetti ─────────────────────────────────────────────────────────────
-    function launchConfetti() {
-        showToast('Bravo ! 🎉');
-    }
+    function launchConfetti() { showToast('Bravo ! 🎉'); }
 
-    // ── Render ────────────────────────────────────────────────────────────────
+    // ── Render ───────────────────────────────────────────────────────────────
     function renderTasks() {
         taskList.innerHTML = '';
         boardContainer.innerHTML = '';
@@ -433,11 +513,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (currentView === 'list') {
             filtered.forEach(t => taskList.appendChild(createTaskEl(t)));
         } else if (currentView === 'board') {
-            buildBoard(filtered);
-            initColumnDrop();
+            buildBoard(filtered); initColumnDrop();
         } else {
-            buildTimeline(filtered);
-            initColumnDrop();
+            buildTimeline(filtered); initColumnDrop();
         }
         updateUI();
     }
@@ -455,16 +533,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const sort = sortSelect.value;
         raw.sort((a, b) => {
             if (a.pinned !== b.pinned) return b.pinned ? 1 : -1;
-            if (sort === 'alpha')   return a.text.localeCompare(b.text);
-            if (sort === 'date')    return (a.dueDate || '9999') < (b.dueDate || '9999') ? -1 : 1;
-            return b.id - a.id; // created (default)
+            if (sort === 'alpha') return a.text.localeCompare(b.text);
+            if (sort === 'date')  return (a.dueDate || '9999') < (b.dueDate || '9999') ? -1 : 1;
+            return b.id - a.id;
         });
         return raw;
     }
 
     function buildBoard(tasks) {
         [
-            { status: 'todo',      label: 'À faire',   icon: SVG.todo,      color: '#888'    },
+            { status: 'todo',      label: 'À faire',   icon: SVG.todo,      color: '#888' },
             { status: 'active',    label: 'En cours',  icon: SVG.active,    color: '#ffbb33' },
             { status: 'completed', label: 'Terminées', icon: SVG.completed, color: '#00C851' },
         ].forEach(col => {
@@ -478,54 +556,81 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function buildTimeline(tasks) {
+        const now        = new Date();
+        const currentHH  = pad(now.getHours());
+        const currentMin = now.getMinutes();
+
         const HOURS = ['none', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22'];
 
         HOURS.forEach(hour => {
             const hourTasks = tasks.filter(t =>
                 hour === 'none' ? !t.startTime : (t.startTime && t.startTime.startsWith(hour))
             );
-
-            // Only render hour columns that have tasks OR are default work hours (08-19)
             const isWorkHour = parseInt(hour) >= 8 && parseInt(hour) <= 19;
             if (hourTasks.length === 0 && !isWorkHour && hour !== 'none') return;
 
+            const isNow = hour === currentHH;
             const div = document.createElement('div');
-            div.className = 'timeline-column'; div.dataset.hour = hour;
+            div.className = 'timeline-column' + (isNow ? ' timeline-column--now' : '');
+            div.dataset.hour = hour;
+
             const label = hour === 'none' ? 'Non planifié' : `${hour}:00`;
             div.innerHTML = `
                 <div class="timeline-hour">
                     <span>${label}</span>
                     <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">${hour === 'none' ? SVG.calendar : SVG.clock}</svg>
                 </div>`;
+
+            // ── NOW INDICATOR ─────────────────────────────────────────────
+            if (isNow) {
+                const indicator = document.createElement('div');
+                indicator.className = 'now-indicator';
+                indicator.innerHTML = `<div class="now-dot"></div> Maintenant — ${pad(currentHH)}:${pad(currentMin)}`;
+                div.appendChild(indicator);
+            }
+
             hourTasks.forEach(t => div.appendChild(createTaskEl(t, true)));
             timelineContainer.appendChild(div);
         });
     }
 
+    // ── Create Task Element ──────────────────────────────────────────────────
     function createTaskEl(task, compact = false) {
+        const now   = new Date();
+        const hhmm  = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+        const isOverdue = task.startTime && task.startTime < hhmm && task.status !== 'completed';
+
         const li = document.createElement('li');
-        li.className = `task-item${task.status === 'completed' ? ' completed' : ''}${task.pinned ? ' pinned' : ''}`;
+        li.className = `task-item${task.status === 'completed' ? ' completed' : ''}${task.pinned ? ' pinned' : ''}${isOverdue && compact ? ' overdue-task' : ''}`;
         li.dataset.id = task.id; li.dataset.status = task.status;
         initDragAndDrop(li, task.id);
+
+        // ── DOUBLE CLICK → edit modal ──────────────────────────────────────
+        li.addEventListener('dblclick', e => {
+            // Don't open modal if clicking action buttons or subtask area
+            if (e.target.closest('.task-actions') || e.target.closest('.subtask-section')) return;
+            e.stopPropagation();
+            openEditModal(task.id);
+        });
 
         const tagBadge = `<span class="tag-badge">#${task.tag}</span>`;
 
         let dateHtml = '';
         if (task.dueDate) {
-            const due = new Date(task.dueDate + 'T00:00:00');
+            const due   = new Date(task.dueDate + 'T00:00:00');
             const today = new Date(); today.setHours(0, 0, 0, 0);
-            const overdue = due < today && task.status !== 'completed';
-            dateHtml = `<span class="due-date-badge ${overdue ? 'overdue' : ''}"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">${SVG.hourglass}</svg>${due.toLocaleDateString('fr-FR')}</span>`;
+            const od    = due < today && task.status !== 'completed';
+            dateHtml = `<span class="due-date-badge ${od ? 'overdue' : ''}"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">${SVG.hourglass}</svg>${due.toLocaleDateString('fr-FR')}</span>`;
         }
 
         let timeHtml = '';
         if (task.startTime) {
-            const durPart = task.duration ? `<span class="duration-badge">${task.duration}m</span>` : '';
-            timeHtml = `<span class="time-badge"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">${SVG.clock}</svg>${task.startTime}${durPart}</span>`;
+            const dur = task.duration ? `<span class="duration-badge">${task.duration}m</span>` : '';
+            timeHtml = `<span class="time-badge${isOverdue ? ' time-badge--overdue' : ''}"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">${SVG.clock}</svg>${task.startTime}${dur}</span>`;
         }
 
         const colorDot   = task.color ? `<span class="color-label" style="background:${task.color}"></span>` : '';
-        const subCount   = task.subtasks && task.subtasks.length ? `<span class="subtask-count">${task.subtasks.filter(s => s.done).length}/${task.subtasks.length}</span>` : '';
+        const subCount   = task.subtasks?.length ? `<span class="subtask-count">${task.subtasks.filter(s => s.done).length}/${task.subtasks.length}</span>` : '';
         const recurBadge = task.recurring ? `<span class="recurring-badge"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">${SVG.repeat}</svg></span>` : '';
         const statusIcon = task.status === 'completed' ? SVG.completed : task.status === 'active' ? SVG.active : SVG.todo;
         const noteHtml   = task.note ? `<span class="task-note">${escHtml(task.note)}</span>` : '';
@@ -563,7 +668,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             </div>`;
 
-        // ── Event listeners ───────────────────────────────────────────────────
+        // Handlers
         li.querySelector('.status-cycle').onclick = e => {
             e.stopPropagation();
             const order = ['todo', 'active', 'completed'];
@@ -571,37 +676,19 @@ document.addEventListener('DOMContentLoaded', () => {
             if (task.status === 'completed') launchConfetti();
             saveAndRender();
         };
-
         li.querySelector('.duplicate-btn').onclick = e => {
             e.stopPropagation();
             tasks.push({ ...task, id: Date.now(), text: task.text + ' (Copie)', expanded: false });
-            saveAndRender();
-            showToast('Tâche dupliquée !');
+            saveAndRender(); showToast('Tâche dupliquée !');
         };
-
-        li.querySelector('.pin-btn').onclick = e => {
-            e.stopPropagation();
-            task.pinned = !task.pinned;
-            saveAndRender();
-        };
-
-        li.querySelector('.expand-btn').onclick = e => {
-            e.stopPropagation();
-            task.expanded = !task.expanded;
-            saveTasks(); renderTasks();
-        };
-
-        li.querySelector('.delete-btn').onclick = e => {
-            e.stopPropagation();
-            tasks = tasks.filter(t => t.id !== task.id);
-            saveAndRender();
-        };
+        li.querySelector('.pin-btn').onclick = e => { e.stopPropagation(); task.pinned = !task.pinned; saveAndRender(); };
+        li.querySelector('.expand-btn').onclick = e => { e.stopPropagation(); task.expanded = !task.expanded; saveTasks(); renderTasks(); };
+        li.querySelector('.delete-btn').onclick = e => { e.stopPropagation(); tasks = tasks.filter(t => t.id !== task.id); saveAndRender(); };
 
         const textSpan = li.querySelector('.task-text');
-        textSpan.onblur = () => {
-            const val = textSpan.innerText.trim();
-            if (val && val !== task.text) { task.text = val; saveTasks(); }
-        };
+        textSpan.onblur = () => { const v = textSpan.innerText.trim(); if (v && v !== task.text) { task.text = v; saveTasks(); } };
+        // Prevent contenteditable from triggering dblclick on single-click
+        textSpan.onclick = e => e.stopPropagation();
 
         // Subtasks
         li.querySelectorAll('.subtask-item').forEach(item => {
@@ -611,26 +698,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (task.subtasks[idx].done) launchConfetti();
                 saveAndRender();
             };
-            item.querySelector('.mini-del-sub').onclick = () => {
-                task.subtasks.splice(idx, 1);
-                saveAndRender();
-            };
+            item.querySelector('.mini-del-sub').onclick = () => { task.subtasks.splice(idx, 1); saveAndRender(); };
         });
 
         const subInput = li.querySelector('.subtask-input-mini');
-        const doAddSub = () => {
-            const val = subInput.value.trim();
-            if (val) { task.subtasks.push({ text: val, done: false }); saveAndRender(); }
-        };
+        const doAddSub = () => { const v = subInput.value.trim(); if (v) { task.subtasks.push({ text: v, done: false }); saveAndRender(); } };
         li.querySelector('.mini-add-btn').onclick = doAddSub;
         subInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); doAddSub(); } });
-
-        // Cancel subtask creation — clears input and collapses section
-        li.querySelector('.mini-cancel-sub').onclick = () => {
-            subInput.value = '';
-            task.expanded  = false;
-            saveTasks(); renderTasks();
-        };
+        li.querySelector('.mini-cancel-sub').onclick = () => { subInput.value = ''; task.expanded = false; saveTasks(); renderTasks(); };
 
         return li;
     }
@@ -649,34 +724,29 @@ document.addEventListener('DOMContentLoaded', () => {
         if (progressBar) progressBar.style.strokeDashoffset = 440 - (pct / 100) * 440;
         if (circlePct)   circlePct.textContent = `${pct}%`;
         if (progressText) progressText.textContent = `${done}/${total} éléments`;
-        if (statsDetail)  statsDetail.textContent = `${active} en cours • ${done} terminées`;
+        if (statsDetail)  statsDetail.textContent  = `${active} en cours • ${done} terminées`;
         if (statTodo)   statTodo.textContent   = todo;
         if (statActive) statActive.textContent = active;
         if (statDone)   statDone.textContent   = done;
 
-        const targetPct = Math.min((done / dailyTarget) * 100, 100);
-        if (targetFill) targetFill.style.width = `${targetPct}%`;
+        if (targetFill) targetFill.style.width = `${Math.min((done / dailyTarget) * 100, 100)}%`;
         if (targetText) {
             if (done >= dailyTarget && total > 0) {
-                targetText.textContent = 'Objectif atteint ! 🔥';
-                targetText.style.color = '#00C851';
+                targetText.textContent = 'Objectif atteint ! 🔥'; targetText.style.color = '#00C851';
             } else {
-                targetText.textContent = `${done}/${dailyTarget} terminées`;
-                targetText.style.color = '';
+                targetText.textContent = `${done}/${dailyTarget} terminées`; targetText.style.color = '';
             }
         }
     }
 
     function updateClock() {
-        const now = new Date();
+        const now    = new Date();
         const days   = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
         const months = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
-        const clockTime = clockEl.querySelector('.clock-time');
-        const clockAmpm = clockEl.querySelector('.clock-ampm');
-        const clockDate = document.getElementById('clockDate');
-        if (clockTime) clockTime.textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
-        if (clockAmpm) clockAmpm.textContent = now.getHours() >= 12 ? 'PM' : 'AM';
-        if (clockDate) clockDate.textContent = `${days[now.getDay()]} ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+        clockEl.querySelector('.clock-time')?.setAttribute('textContent', `${pad(now.getHours())}:${pad(now.getMinutes())}`);
+        const ct = clockEl.querySelector('.clock-time'); if (ct) ct.textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+        const ca = clockEl.querySelector('.clock-ampm'); if (ca) ca.textContent = now.getHours() >= 12 ? 'PM' : 'AM';
+        const cd = document.getElementById('clockDate'); if (cd) cd.textContent = `${days[now.getDay()]} ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
     }
 
     function pad(n) { return String(n).padStart(2, '0'); }
@@ -686,36 +756,34 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!el) return;
         el.textContent = msg;
         el.classList.add('show');
-        setTimeout(() => el.classList.remove('show'), 2500);
+        clearTimeout(showToast._t);
+        showToast._t = setTimeout(() => el.classList.remove('show'), 2800);
     }
 
     function escHtml(str) {
-        return String(str)
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;');
+        return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
 
-    // ── Modal ────────────────────────────────────────────────────────────────
+    // ── Modal shortcuts ──────────────────────────────────────────────────────
     shortcutsBtn.onclick = () => shortcutsModal.style.display = 'flex';
     closeModal.onclick   = () => shortcutsModal.style.display = 'none';
-    window.onclick = e => { if (e.target === shortcutsModal) shortcutsModal.style.display = 'none'; };
+    window.onclick = e => {
+        if (e.target === shortcutsModal) shortcutsModal.style.display = 'none';
+    };
 
     // ── Export / Import ──────────────────────────────────────────────────────
-    exportBtn.onclick = () => {
+    exportBtn.onclick   = () => {
         const a = document.createElement('a');
         a.href = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(tasks, null, 2));
         a.download = 'neo_tasks.json'; a.click();
     };
-    importBtn.onclick  = () => importFile.click();
+    importBtn.onclick   = () => importFile.click();
     importFile.onchange = e => {
-        const reader = new FileReader();
-        reader.onload = ev => {
+        const r = new FileReader();
+        r.onload = ev => {
             try { tasks = JSON.parse(ev.target.result); saveAndRender(); showToast('Importé !'); }
             catch(_) { showToast('Fichier invalide.'); }
         };
-        reader.readAsText(e.target.files[0]);
+        r.readAsText(e.target.files[0]);
     };
-
 });

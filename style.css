@@ -1523,44 +1523,98 @@ kbd {
 
 /* ── Animations ── */
 @keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: translateY(8px);
-    }
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
 
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+@keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: 0.5; transform: scale(1.4); }
+}
+
+/* ── Edit Task Modal ── */
+.edit-modal-box {
+    width: 440px;
+    max-width: 95vw;
+    max-height: 92vh;
+    overflow-y: auto;
+    animation: slideIn 0.2s ease;
+}
+
+.edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.edit-actions {
+    display: flex;
+    gap: 10px;
+    padding-top: 8px;
+    border-top: 1.5px dashed #ddd;
+}
+body.dark-mode .edit-actions { border-color: #333; }
+
+/* Double-click hint on task cards */
+.task-item {
+    cursor: default;
+}
+.task-item:hover .task-text::after {
+    content: ' ✏️';
+    opacity: 0.35;
+    font-style: normal;
+    font-size: 10px;
+}
+
+/* ── Now Indicator (Planning View) ── */
+.timeline-column--now {
+    border-color: #ff4444 !important;
+    box-shadow: 3px 3px 0 #ff4444 !important;
+}
+
+.timeline-column--now .timeline-hour {
+    color: #ff4444 !important;
+}
+
+.now-indicator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    font-weight: 900;
+    color: #ff4444;
+    letter-spacing: 0.5px;
+    padding: 4px 6px;
+    background: rgba(255, 68, 68, 0.08);
+    border-radius: 6px;
+    margin-bottom: 2px;
+}
+
+.now-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #ff4444;
+    flex-shrink: 0;
+    animation: pulse 1.2s ease-in-out infinite;
+}
+
+/* ── Overdue task highlight in planning ── */
+.timeline-column .task-item.overdue-task {
+    border-color: #ff4444 !important;
 }
 
 /* ── Responsive ── */
 @media (max-width: 1100px) {
-    .dashboard-grid {
-        grid-template-columns: 1fr 300px;
-    }
+    .dashboard-grid { grid-template-columns: 1fr 300px; }
 }
 
 @media (max-width: 920px) {
-    body {
-        padding: 20px;
-    }
-
-    .dashboard-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .hero-title {
-        font-size: 44px;
-    }
-
-    .sidebar {
-        position: static;
-        max-height: none;
-        overflow: visible;
-    }
-
-    .board-container.active {
-        grid-template-columns: 1fr;
-    }
-}
+    body { padding: 20px; }
+    .dashboard-grid { grid-template-columns: 1fr; }
+    .hero-title { font-size: 44px; }
+    .sidebar { position: static; max-height: none; overflow: visible; }
+    .board-container.active { grid-template-columns: 1fr; }
+    .timeline-container.active { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+}
