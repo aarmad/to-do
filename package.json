@@ -23,7 +23,7 @@
     "electron-builder": "^24.13.3"
   },
   "dependencies": {
-    "electron-updater": "^6.3.9"
+    "electron-updater": "^6.8.3"
   },
   "build": {
     "appId": "com.aarmad.neo-list",
@@ -33,6 +33,10 @@
       "output": "dist",
       "buildResources": "assets"
     },
+    "asar": true,
+    "asarUnpack": [
+      "**/node_modules/electron-updater/**/*"
+    ],
     "files": [
       "**/*",
       "!dist/**/*",
@@ -46,7 +50,9 @@
       "target": [
         {
           "target": "nsis",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
       ],
       "icon": "assets/icon.png",
@@ -59,16 +65,24 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "shortcutName": "Neo-List",
-      "installerLanguages": ["fr_FR", "en_US"],
+      "installerLanguages": [
+        "fr_FR",
+        "en_US"
+      ],
       "language": "1036"
     },
     "linux": {
-      "target": ["AppImage", "deb"],
+      "target": [
+        "AppImage",
+        "deb"
+      ],
       "icon": "assets/icon.png",
       "category": "Office"
     },
     "mac": {
-      "target": ["dmg"],
+      "target": [
+        "dmg"
+      ],
       "icon": "assets/icon.png",
       "category": "public.app-category.productivity"
     },

@@ -566,6 +566,17 @@ document.addEventListener('DOMContentLoaded', () => {
             const hourTasks = tasks.filter(t =>
                 hour === 'none' ? !t.startTime : (t.startTime && t.startTime.startsWith(hour))
             );
+
+            // Tri par heure de début exacte, puis durée
+            hourTasks.sort((a, b) => {
+                if (a.startTime !== b.startTime) {
+                    return (a.startTime || '') > (b.startTime || '') ? 1 : -1;
+                }
+                const durA = parseInt(a.duration) || 0;
+                const durB = parseInt(b.duration) || 0;
+                return durA - durB;
+            });
+
             const isWorkHour = parseInt(hour) >= 8 && parseInt(hour) <= 19;
             if (hourTasks.length === 0 && !isWorkHour && hour !== 'none') return;
 
