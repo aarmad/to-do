@@ -39,18 +39,13 @@
       "style.css",
       "script.js",
       "assets/**/*",
-      "!dist/**/*",
-      "!node_modules/**/*"
+      "!dist/**/*"
     ],
     "win": {
       "sign": null,
       "target": [
         {
           "target": "nsis",
-          "arch": ["x64"]
-        },
-        {
-          "target": "portable",
           "arch": ["x64"]
         }
       ],
