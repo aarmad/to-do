@@ -1,0 +1,253 @@
+================================================================
+  DA REFERENCE — HYBRID: NEO-BRUTALISM x GLASSMORPHISM (NOTHING OS STYLE)
+  (Neo-List / slv-chn project by @madjr)
+  À donner à une IA avant de créer/modifier le projet.
+================================================================
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  STYLE GLOBAL & ADN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Esthétique : "Industrial Glass" (Brutalisme structuré + Verre translucide + OS Tech)
+L'objectif est d'obtenir une UI qui ressemble à un système d'exploitation physique et brut, 
+mais avec la profondeur et l'élégance du verre dépoli.
+
+  1. Base (Neo-Brutalisme) :
+     - Bordures franches et assumées (2px à 3px solid, très contrastées).
+     - Ombres dures sans flou (box-shadow: 4px 4px 0px var(--text)).
+     - Contraste maximal entre le fond et le texte.
+
+  2. Profondeur (Glassmorphism contrôlé) :
+     - Panels semi-transparents (opacity 0.6–0.85).
+     - Background blur léger mais visible (backdrop-filter: blur(12px)).
+     - Reflets "frosted glass" subtils via des bordures internes fines (inset shadow).
+     - Le glassmorphism vient ADOUCIR l'intérieur des composants, sans casser leur contour brutal.
+
+  3. Structure (Nothing OS & Widgets) :
+     - Philosophie de modules autonomes type widgets interactifs.
+     - Grille stricte (système de 8pt), alignements parfaits type "engineering UI".
+     - Identité visuelle axée sur la typographie comme élément d'interface.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  TYPOGRAPHIE MODULAIRE (Nothing-inspired)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Police principale : 'Outfit' ou 'Inter' (Lisibilité maximale, géométrique)
+Police data/chiffres : 'Space Mono' ou équivalent (Style digital, tabular nums)
+
+Hiérarchie stricte :
+  - Titres de section (Modules) : Blocs compacts, très bold, "signalétiques".
+    > font-weight: 800, text-transform: uppercase, letter-spacing: -1px
+  - Micro-labels (System tags) : Style système, fonctionnel.
+    > font-size: 10px, font-weight: 700, letter-spacing: 2px, text-transform: uppercase
+  - Chiffres / Horloges / Stats : Monospaced, dot-matrix vibe.
+    > font-family: 'Space Mono', monospace, font-variant-numeric: tabular-nums
+  - Corps de texte : Clean, aéré, fonctionnel.
+    > font-weight: 400/500, line-height: 1.6
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  VARIABLES CSS (Système Hybride)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+MODE CLAIR (:root)
+  --bg:                #f4f4f0;       (Fond global, léger aspect papier/tech)
+  --bg-pattern:        radial-gradient(#d5d5d5 1px, transparent 1px); (Optionnel: dot grid pour faire réagir le glass)
+  
+  --text:              #0a0a0a;       (Noir profond)
+  --text-muted:        #7a7a7a;       (Gris fonctionnel)
+  
+  --glass-bg:          rgba(255, 255, 255, 0.65);  (Fond widget transparent)
+  --glass-border-in:   inset 0 0 0 1px rgba(255, 255, 255, 0.4); (Reflet interne)
+  --glass-blur:        blur(16px);
+  
+  --border-thick:      2px solid var(--text);
+  --shadow-hard:       4px 4px 0px var(--text);
+  
+  --accent-primary:    #FF2D2D;       (Couleur forte unique : Rouge Nothing)
+  --accent-secondary:  #00E5FF;       (Bleu électrique pour éléments actifs)
+  --radius:            16px;          (Corners arrondis mais structure globale boxy)
+
+MODE SOMBRE (body.dark-mode)
+  --bg:                #0a0a0a;
+  --bg-pattern:        radial-gradient(#222 1px, transparent 1px);
+  
+  --text:              #f0f0f0;
+  --text-muted:        #888888;
+  
+  --glass-bg:          rgba(30, 30, 30, 0.5);
+  --glass-border-in:   inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+  
+  --border-thick:      2px solid var(--text);
+  --shadow-hard:       4px 4px 0px var(--text);
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  COMPOSANTS UI (WIDGETS OS)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+--- WIDGET CARD (Le bloc de base) ---
+  Structure externe forte, intérieur de verre.
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: var(--border-thick);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-hard), var(--glass-border-in);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+
+--- WIDGET SECONDAIRE / NESTED ---
+  (Pour les éléments à l'intérieur d'un widget parent)
+  background: rgba(var(--text-rgb), 0.03); /* Très léger contraste */
+  border: 1px solid var(--text-muted); /* Bordure fine, pas de hard shadow */
+  border-radius: 8px;
+
+--- BOUTON PRINCIPAL (Tech Trigger) ---
+  background: var(--text);
+  color: var(--bg);
+  border: 1px solid var(--text);
+  border-radius: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  box-shadow: 2px 2px 0px var(--accent-primary); /* Accent de couleur subtil */
+  transition: transform 0.15s, box-shadow 0.15s;
+  Hover : transform: translate(2px, 2px); box-shadow: 0px 0px 0px transparent;
+
+--- BOUTON SECONDAIRE (Glass Pill) ---
+  background: var(--glass-bg);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--text);
+  border-radius: 40px;
+  font-weight: 600;
+  Hover : background: var(--text); color: var(--bg);
+
+--- LABELS & TAGS (Micro-UI) ---
+  display: inline-flex;
+  border: 1px solid var(--text);
+  border-radius: 4px; /* Plus carré, plus tech */
+  padding: 4px 8px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+
+--- DATA BLOCKS (Chiffres / Horloges) ---
+  font-family: 'Space Mono', monospace;
+  font-size: 48px; (ou autre, très grand)
+  letter-spacing: -2px;
+  line-height: 1;
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  RÈGLES DE FUSION & INTÉGRATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Fond global (Body) : Un fond plat ou avec un motif de points très subtil (dot grid) est recommandé. Le glassmorphism a besoin d'éléments en arrière-plan pour que le blur (flou) soit visible.
+2. Contraste Brutal + Douceur : Les bordures externes des widgets DOIVENT être opaques et fortes (le côté brutaliste). Le fond du widget DOIT être translucide et flou (le côté glass).
+3. Alignement (Grid) : Penser en termes de Dashboard OS. Les widgets doivent s'aligner parfaitement sur une grille invisible. Utiliser CSS Grid.
+4. Micro-animations : Pas d'animations rebondissantes. Uniquement des transitions sèches, rapides (0.15s) ou des fades subtils. Un hover sur un bouton brut doit donner l'impression d'appuyer sur une touche mécanique (suppression de l'ombre dure + translation).
+5. Typographie comme Image : Les textes (surtout les gros chiffres et les titres de widgets) font partie du design. Utiliser les majuscules et l'espacement pour structurer.
+6. Cacher la complexité : Comme dans Nothing OS, utiliser des icônes simples, des lignes épurées. Les options secondaires apparaissent au hover (fade-in translucide).
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  TEMPLATE CSS MINIMAL (Base OS)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Space+Mono:wght@400;700&display=swap');
+
+:root {
+  --bg: #f4f4f0;
+  --text: #0a0a0a;
+  --text-muted: #7a7a7a;
+  
+  --glass-bg: rgba(255, 255, 255, 0.65);
+  --glass-blur: blur(16px);
+  --glass-border-in: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+  
+  --border-thick: 2px solid var(--text);
+  --shadow-hard: 4px 4px 0px var(--text);
+  
+  --accent: #FF2D2D;
+  --radius: 16px;
+}
+
+body.dark-mode {
+  --bg: #0a0a0a;
+  --text: #f0f0f0;
+  --text-muted: #888888;
+  --glass-bg: rgba(30, 30, 30, 0.5);
+  --glass-border-in: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+body {
+  font-family: 'Outfit', -apple-system, sans-serif;
+  background-color: var(--bg);
+  /* Optionnel : Dot grid background pour révéler le glassmorphism */
+  background-image: radial-gradient(var(--text-muted) 1px, transparent 1px);
+  background-size: 20px 20px;
+  background-position: 0 0;
+  color: var(--text);
+  margin: 0; padding: 32px;
+  min-height: 100vh;
+}
+
+/* WIDGET OS SYSTEM */
+.os-widget {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  
+  border: var(--border-thick);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-hard), var(--glass-border-in);
+  
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.os-widget-header {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.os-data-value {
+  font-family: 'Space Mono', monospace;
+  font-size: 48px;
+  font-weight: 700;
+  letter-spacing: -2px;
+  line-height: 1;
+}
+
+/* INTERACTIVE WIDGET BTN */
+.btn-tech {
+  background: var(--text);
+  color: var(--bg);
+  border: 1px solid var(--text);
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 12px;
+  cursor: pointer;
+  box-shadow: 2px 2px 0px var(--accent);
+  transition: all 0.15s ease;
+}
+
+.btn-tech:hover {
+  transform: translate(2px, 2px);
+  box-shadow: 0px 0px 0px transparent;
+}
+
+================================================================
+  FIN DU FICHIER DA_REFERENCE.txt
+================================================================
