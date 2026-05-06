@@ -1,6 +1,6 @@
 {
   "name": "neo-list",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Neo-List — Application de gestion de tâches (néo-brutaliste)",
   "main": "electron/main.js",
   "author": {

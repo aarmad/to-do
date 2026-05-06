@@ -16,10 +16,8 @@ jobs:
         # Pour multi-plateforme, ajouter: ubuntu-latest, macos-latest
 
     steps:
-      - name: 📥 Checkout branche desktop
+      - name: 📥 Checkout repository
         uses: actions/checkout@v4
-        with:
-          ref: desktop
 
       - name: 🟢 Setup Node.js 20
         uses: actions/setup-node@v4
