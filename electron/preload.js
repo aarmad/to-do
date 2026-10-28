@@ -29,6 +29,20 @@ contextBridge.exposeInMainWorld('electronAPI', {
     showNotification: (title, body, silent = false) =>
         ipcRenderer.invoke('notification:show', { title, body, silent }),
 
+    // ── Reconnaissance vocale ─────────────────────────────────────────────────
+    prepareSpeech: ()        => ipcRenderer.invoke('stt:prepare'),
+    transcribe:    (samples) => ipcRenderer.invoke('stt:transcribe', samples),
+    onSpeechProgress: (cb) => {
+        const handler = (_, p) => cb(p);
+        ipcRenderer.on('stt:progress', handler);
+        return () => ipcRenderer.removeListener('stt:progress', handler);
+    },
+
+    // ── Clips audio des tâches ────────────────────────────────────────────────
+    saveAudio:   (id, data) => ipcRenderer.invoke('audio:save', id, data),
+    loadAudio:   (id)       => ipcRenderer.invoke('audio:load', id),
+    deleteAudio: (id)       => ipcRenderer.invoke('audio:delete', id),
+
     // ── Mises à jour ──────────────────────────────────────────────────────────
     checkForUpdates: () => ipcRenderer.invoke('update:check'),
     installUpdate:   () => ipcRenderer.invoke('update:install'),

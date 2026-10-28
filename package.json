@@ -1,6 +1,6 @@
 {
   "name": "neo-list",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "Neo-List — Application de gestion de tâches (néo-brutaliste)",
   "main": "electron/main.js",
   "author": {
@@ -23,6 +23,7 @@
     "electron-builder": "^24.13.3"
   },
   "dependencies": {
+    "@huggingface/transformers": "^3.8.1",
     "electron-updater": "^6.8.3"
   },
   "build": {
@@ -35,7 +36,10 @@
     },
     "asar": true,
     "asarUnpack": [
-      "**/node_modules/electron-updater/**/*"
+      "**/node_modules/electron-updater/**/*",
+      "**/node_modules/onnxruntime-node/**/*",
+      "**/node_modules/sharp/**/*",
+      "**/node_modules/@img/**/*"
     ],
     "files": [
       "**/*",
@@ -43,7 +47,10 @@
       "!.github/**/*",
       "!.gitignore",
       "!README*",
-      "!*.md"
+      "!*.md",
+      "!**/node_modules/onnxruntime-web/**/*",
+      "!**/node_modules/@huggingface/transformers/dist/*.map",
+      "!**/node_modules/@huggingface/transformers/src/**/*"
     ],
     "win": {
       "sign": null,
@@ -56,7 +63,11 @@
         }
       ],
       "icon": "assets/icon.png",
-      "requestedExecutionLevel": "asInvoker"
+      "requestedExecutionLevel": "asInvoker",
+      "files": [
+        "!**/node_modules/onnxruntime-node/bin/napi-v3/{darwin,linux}/**/*",
+        "!**/node_modules/onnxruntime-node/bin/napi-v3/win32/arm64/**/*"
+      ]
     },
     "nsis": {
       "oneClick": false,

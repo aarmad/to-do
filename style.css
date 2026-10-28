@@ -1187,101 +1187,6 @@ body.dark-mode .subtask-section {
     opacity: 0.9;
 }
 
-/* ── Planning / Timeline View ── */
-.timeline-container {
-    display: none;
-    padding-bottom: 16px;
-    width: 100%;
-}
-
-.timeline-container.active {
-    display: grid;
-    /* Au moins 200px par colonne, au max 1fr — ça remplit l'écran sans overflow bizarre */
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 12px;
-    align-items: start;
-}
-
-.timeline-column {
-    background: var(--card);
-    border: var(--border);
-    border-radius: 14px;
-    padding: 12px;
-    min-height: 80px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    box-shadow: 3px 3px 0 #111;
-    transition: border-color 0.15s, box-shadow 0.15s;
-    overflow: hidden;   /* Empêche les dépassements */
-}
-
-body.dark-mode .timeline-column {
-    box-shadow: 3px 3px 0 #444;
-}
-
-.timeline-column.drag-over {
-    border-color: var(--planning-color) !important;
-    box-shadow: 3px 3px 0 var(--planning-color) !important;
-}
-
-.timeline-hour {
-    font-size: 11px;
-    font-weight: 900;
-    color: var(--planning-color);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    padding-bottom: 8px;
-    border-bottom: 2px dashed rgba(114,137,218,0.25);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-/* Cards compactes dans la vue planning */
-.timeline-column .task-item {
-    padding: 8px 10px;
-    border-radius: 10px;
-    cursor: grab;
-    min-height: auto;
-}
-
-/* Texte sur UNE SEULE ligne avec “…” */
-.timeline-column .task-text {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    font-size: 13px;
-    max-width: 100%;
-    display: block;
-}
-
-/* Cacher les boutons d’actions et la note dans la vue planning */
-.timeline-column .task-actions { display: none; }
-.timeline-column .task-note    { display: none; }
-.timeline-column .subtask-section { display: none !important; }
-
-/* Badges réduits */
-.timeline-column .task-meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-    overflow: hidden;
-}
-
-.timeline-column .tag-badge,
-.timeline-column .due-date-badge,
-.timeline-column .time-badge {
-    max-width: 100%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-/* Cacher la couleur dot et badges secondaires pour garder les cartes propres */
-.timeline-column .recurring-badge { display: none; }
-
-
 .time-badge {
     background: #1e1e30;
     color: #7289da;
@@ -1777,53 +1682,8 @@ kbd {
 }
 body.dark-mode .edit-actions { border-color: #333; }
 
-/* Double-click hint on task cards */
 .task-item {
     cursor: default;
-}
-.task-item:hover .task-text::after {
-    content: ' ✏️';
-    opacity: 0.35;
-    font-style: normal;
-    font-size: 10px;
-}
-
-/* ── Now Indicator (Planning View) ── */
-.timeline-column--now {
-    border-color: #ff4444 !important;
-    box-shadow: 3px 3px 0 #ff4444 !important;
-}
-
-.timeline-column--now .timeline-hour {
-    color: #ff4444 !important;
-}
-
-.now-indicator {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 10px;
-    font-weight: 900;
-    color: #ff4444;
-    letter-spacing: 0.5px;
-    padding: 4px 6px;
-    background: rgba(255, 68, 68, 0.08);
-    border-radius: 6px;
-    margin-bottom: 2px;
-}
-
-.now-dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: #ff4444;
-    flex-shrink: 0;
-    animation: pulse 1.2s ease-in-out infinite;
-}
-
-/* ── Overdue task highlight in planning ── */
-.timeline-column .task-item.overdue-task {
-    border-color: #ff4444 !important;
 }
 
 /* ── Responsive ── */
@@ -1837,5 +1697,630 @@ body.dark-mode .edit-actions { border-color: #333; }
     .hero-title { font-size: 44px; }
     .sidebar { position: static; max-height: none; overflow: visible; }
     .board-container.active { grid-template-columns: 1fr; }
-    .timeline-container.active { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
-}
+}
+/* ══════════════════════════════════════════════════════════════
+   Capture vocale — mode principal d'ajout
+   ══════════════════════════════════════════════════════════════ */
+.voice-badge {
+    margin-left: auto;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    border-radius: 4px;
+    padding: 3px 7px;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+}
+
+.voice-capture {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 18px 12px 14px;
+    border: 1px solid var(--text-muted);
+    border-radius: 12px;
+    background: rgba(127, 127, 127, 0.04);
+    text-align: center;
+}
+
+.voice-btn {
+    position: relative;
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    border: var(--border);
+    background: var(--text);
+    color: var(--bg);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 4px 4px 0px var(--accent);
+    transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+}
+
+.voice-btn:hover,
+.voice-btn:focus-visible {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0px var(--accent);
+    outline: none;
+}
+
+.voice-btn:active {
+    transform: translate(4px, 4px);
+    box-shadow: 0px 0px 0px transparent;
+}
+
+.voice-icon-stop,
+.voice-spinner { display: none; }
+
+.voice-spinner {
+    width: 30px;
+    height: 30px;
+    border: 3px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: voiceSpin 0.8s linear infinite;
+}
+
+/* Recording */
+.voice-capture[data-state="recording"] .voice-btn {
+    background: var(--accent);
+    color: #fff;
+    box-shadow: 4px 4px 0px var(--text);
+    animation: voiceRec 1.2s ease-in-out infinite;
+}
+.voice-capture[data-state="recording"] .voice-icon-mic { display: none; }
+.voice-capture[data-state="recording"] .voice-icon-stop { display: block; }
+
+/* Transcribing / loading model */
+.voice-capture[data-state="busy"] .voice-btn { cursor: progress; }
+.voice-capture[data-state="busy"] .voice-icon-mic { display: none; }
+.voice-capture[data-state="busy"] .voice-spinner { display: block; }
+
+.voice-meter {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    height: 22px;
+    opacity: 0.25;
+    transition: opacity 0.15s;
+}
+.voice-meter span {
+    width: 5px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--text);
+    transition: height 0.08s linear;
+}
+.voice-capture[data-state="recording"] .voice-meter { opacity: 1; }
+.voice-capture[data-state="recording"] .voice-meter span { background: var(--accent); }
+
+.voice-timer {
+    font-family: 'Space Mono', monospace;
+    font-variant-numeric: tabular-nums;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -1px;
+    line-height: 1;
+    color: var(--text-muted);
+}
+.voice-capture[data-state="recording"] .voice-timer { color: var(--accent); }
+
+.voice-status {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text);
+}
+.voice-capture[data-state="error"] .voice-status { color: var(--accent); }
+
+.voice-hint {
+    font-size: 11px;
+    color: var(--text-muted);
+    line-height: 1.4;
+}
+.voice-hint--keys kbd { font-size: 9px; min-width: 0; padding: 1px 5px; }
+.voice-capture[data-state="recording"] .voice-hint,
+.voice-capture[data-state="busy"] .voice-hint { display: none; }
+
+.voice-result {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+    padding: 8px 10px;
+    border: 1px solid #00C851;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: left;
+    animation: slideIn 0.15s ease;
+}
+.voice-result-text {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.voice-undo-btn {
+    border: 1px solid var(--text);
+    background: transparent;
+    color: var(--text);
+    border-radius: 4px;
+    padding: 3px 8px;
+    font-family: inherit;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+.voice-undo-btn:hover { background: var(--text); color: var(--bg); }
+
+/* Saisie manuelle (repliée par défaut) */
+.manual-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 8px;
+    border: 1px dashed var(--text-muted);
+    border-radius: 40px;
+    background: transparent;
+    color: var(--text-muted);
+    font-family: inherit;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+}
+.manual-toggle:hover { color: var(--text); border-color: var(--text); }
+.manual-toggle[aria-expanded="true"] .manual-chevron { transform: rotate(180deg); }
+
+.manual-form {
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Lecture du mémo vocal sur une tâche */
+.audio-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    border: 1px solid currentColor;
+    border-radius: 4px;
+    padding: 1px 6px;
+    background: transparent;
+    color: var(--accent);
+    font-family: inherit;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    cursor: pointer;
+}
+.audio-badge.playing { background: var(--accent); color: #fff; }
+
+@keyframes voiceRec {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.75; }
+}
+@keyframes voiceSpin {
+    to { transform: rotate(360deg); }
+}
+
+/* Dictée d'une modification (fenêtre d'édition) */
+.edit-voice {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border: 1px solid var(--text-muted);
+    border-radius: 12px;
+    background: rgba(127, 127, 127, 0.04);
+}
+
+.edit-voice-btn {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: var(--border);
+    background: var(--text);
+    color: var(--bg);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 2px 2px 0px var(--accent);
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+.edit-voice-btn:hover { transform: translate(2px, 2px); box-shadow: 0px 0px 0px transparent; }
+.edit-voice-btn .voice-spinner { width: 18px; height: 18px; border-width: 2px; }
+
+.edit-voice[data-state="recording"] .edit-voice-btn {
+    background: var(--accent);
+    color: #fff;
+    animation: voiceRec 1.2s ease-in-out infinite;
+}
+.edit-voice[data-state="recording"] .voice-icon-mic,
+.edit-voice[data-state="busy"] .voice-icon-mic { display: none; }
+.edit-voice[data-state="recording"] .voice-icon-stop { display: block; }
+.edit-voice[data-state="busy"] .voice-spinner { display: block; }
+.edit-voice[data-state="busy"] .edit-voice-btn { cursor: progress; }
+
+.edit-voice-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+.edit-voice-status {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+.edit-voice[data-state="error"] .edit-voice-status { color: var(--accent); }
+.edit-voice-hint {
+    font-size: 11px;
+    color: var(--text-muted);
+    line-height: 1.4;
+}
+
+/* Champ modifié par la voix */
+.field-flash {
+    animation: fieldFlash 1.6s ease;
+}
+@keyframes fieldFlash {
+    0%, 40% { box-shadow: 0 0 0 2px #00C851; }
+    100%    { box-shadow: 0 0 0 2px transparent; }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Logo
+   ══════════════════════════════════════════════════════════════ */
+.electron-title-bar .etb-drag .neo-logo path { fill: var(--text, #0a0a0a); stroke: none; }
+.neo-logo-accent { fill: #D77E4B; }
+
+/* ══════════════════════════════════════════════════════════════
+   Agenda — vue semaine / jour façon Calendar
+   ══════════════════════════════════════════════════════════════ */
+.calendar-container { display: none; }
+.calendar-container.active { display: flex; flex-direction: column; gap: 12px; }
+
+/* En vue agenda : pas de tri ni d'actions groupées */
+.task-list-card.is-calendar .sort-select,
+.task-list-card.is-calendar .bulk-actions-neo { display: none; }
+
+.cal-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.cal-today-btn,
+.cal-mode-btn {
+    background: var(--glass-bg);
+    border: 1px solid var(--text);
+    color: var(--text);
+    border-radius: 40px;
+    padding: 7px 16px;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+.cal-today-btn:hover,
+.cal-mode-btn:hover,
+.cal-mode-btn.active { background: var(--text); color: var(--bg); }
+
+.cal-nav { display: flex; gap: 2px; }
+.cal-nav-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: var(--text);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+}
+.cal-nav-btn:hover { background: rgba(127, 127, 127, 0.15); }
+
+.cal-title {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    margin-right: auto;
+}
+
+.cal-mode { display: flex; }
+.cal-mode-btn { border-radius: 0; padding: 7px 14px; }
+.cal-mode-btn:first-child { border-radius: 40px 0 0 40px; }
+.cal-mode-btn:last-child  { border-radius: 0 40px 40px 0; border-left: none; }
+
+/* Tâches sans date */
+.cal-tray {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 40px;
+    padding: 6px 10px;
+    border: 1px dashed var(--text-muted);
+    border-radius: 10px;
+    overflow-x: auto;
+}
+.cal-tray.drag-over { border-color: var(--accent); background: rgba(255, 45, 45, 0.05); }
+.cal-tray-label {
+    flex-shrink: 0;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+.cal-tray-items { display: flex; gap: 6px; }
+.cal-tray-empty { font-size: 12px; color: var(--text-muted); }
+.cal-tray .cal-chip { max-width: 200px; }
+
+/* Grille */
+.cal-scroll {
+    position: relative;
+    height: clamp(420px, calc(100vh - 340px), 1000px);
+    overflow-y: auto;
+    border: 1px solid var(--text-muted);
+    border-radius: 12px;
+    --cal-line: rgba(127, 127, 127, 0.22);
+}
+
+.cal-row {
+    display: grid;
+    grid-template-columns: 56px repeat(var(--days), minmax(0, 1fr));
+}
+
+.cal-sticky {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: var(--bg);
+    border-bottom: 2px solid var(--text);
+}
+
+.cal-gutter {
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 6px 6px 0 0;
+    text-align: right;
+}
+
+.cal-day-head {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 8px 0 6px;
+    cursor: pointer;
+}
+.cal-dow {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: var(--text-muted);
+}
+.cal-dnum {
+    font-family: 'Space Mono', monospace;
+    font-variant-numeric: tabular-nums;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -1px;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+}
+.cal-day-head:hover .cal-dnum { background: rgba(127, 127, 127, 0.15); }
+.cal-day-head.is-today .cal-dow { color: var(--accent); }
+.cal-day-head.is-today .cal-dnum { background: var(--accent); color: #fff; }
+
+.cal-allday { border-top: 1px solid var(--cal-line); }
+.cal-allday .cal-gutter { padding-top: 8px; }
+.cal-allday-cell {
+    min-height: 30px;
+    max-height: 84px;
+    overflow-y: auto;
+    padding: 3px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    border-left: 1px solid var(--cal-line);
+    cursor: pointer;
+}
+.cal-allday-cell.drag-over { background: rgba(255, 45, 45, 0.08); }
+
+.cal-times { position: relative; padding: 0; }
+.cal-time {
+    position: absolute;
+    right: 8px;
+    transform: translateY(-50%);
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0;
+}
+
+.cal-col {
+    position: relative;
+    border-left: 1px solid var(--cal-line);
+    background-image: linear-gradient(var(--cal-line) 1px, transparent 1px);
+    background-size: 100% var(--hour-px);
+    cursor: pointer;
+}
+.cal-col.is-today { background-color: rgba(255, 45, 45, 0.03); }
+.cal-col.drag-over { background-color: rgba(255, 45, 45, 0.06); }
+
+/* Tâches dans la grille */
+.cal-event,
+.cal-chip {
+    --ev-bg: var(--text);
+    --ev-fg: var(--bg);
+    background: var(--ev-bg);
+    color: var(--ev-fg);
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.25;
+    cursor: pointer;
+    overflow: hidden;
+    user-select: none;
+    transition: box-shadow 0.15s, transform 0.15s;
+}
+
+.cal-event {
+    position: absolute;
+    z-index: 2;
+    padding: 3px 7px;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--bg);
+}
+.cal-event:hover,
+.cal-chip:hover {
+    z-index: 3;
+    box-shadow: 2px 2px 0 var(--text);
+    transform: translate(-1px, -1px);
+}
+.cal-event.dragging,
+.cal-chip.dragging { opacity: 0.4; }
+
+.cal-ev-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.cal-ev-time {
+    font-size: 11px;
+    font-weight: 500;
+    opacity: 0.9;
+    white-space: nowrap;
+}
+/* Tâche courte : titre et heure sur une ligne, comme Calendar */
+.cal-event.is-short {
+    flex-direction: row;
+    align-items: center;
+    gap: 4px;
+    padding-top: 1px;
+    padding-bottom: 1px;
+}
+/* Le titre reste lisible : c'est l'heure qui se tronque en premier */
+.cal-event.is-short .cal-ev-title { flex: 0 0 auto; max-width: 100%; }
+.cal-event.is-short .cal-ev-time {
+    flex: 0 1000 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* En vue agenda, l'en-tête se fait discret pour laisser la place à la grille */
+body.view-calendar .hero-title { font-size: 36px; letter-spacing: -1px; }
+body.view-calendar .hero-title br { display: none; }
+body.view-calendar .hero-title .star-svg { width: 26px; height: 26px; }
+
+.cal-ev-resize {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 6px;
+    cursor: ns-resize;
+}
+
+.cal-event.is-done,
+.cal-chip.is-done { opacity: 0.5; }
+.cal-event.is-done .cal-ev-title,
+.cal-chip.is-done span { text-decoration: line-through; }
+
+.cal-chip {
+    flex-shrink: 0;
+    padding: 3px 8px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+/* Aperçu de dépôt et ligne « maintenant » */
+.cal-drop-ghost {
+    position: absolute;
+    left: 2px;
+    right: 4px;
+    z-index: 4;
+    border: 2px dashed var(--accent);
+    border-radius: 6px;
+    background: rgba(255, 45, 45, 0.08);
+    pointer-events: none;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--accent);
+    padding: 2px 6px;
+}
+
+.cal-now {
+    position: absolute;
+    left: -1px;
+    right: 0;
+    z-index: 4;
+    height: 2px;
+    background: var(--accent);
+    pointer-events: none;
+}
+.cal-now::before {
+    content: '';
+    position: absolute;
+    left: -6px;
+    top: -5px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--accent);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Icônes SVG en ligne (aucune emoji dans l'interface)
+   ══════════════════════════════════════════════════════════════ */
+svg.i { flex-shrink: 0; vertical-align: -2px; }
+
+.toast { display: flex; align-items: center; gap: 8px; }
+#updateMsg { display: inline-flex; align-items: center; gap: 6px; }
+.target-text svg { vertical-align: -1px; }
+
+.mini-label svg,
+.shortcut-row span svg { vertical-align: -2px; }
+.mini-label svg { margin-right: 2px; }
+kbd svg { vertical-align: -2px; }
+
+#editModalTitle { display: flex; align-items: center; gap: 8px; }
+
+.cal-ev-title svg.i { margin-right: 3px; vertical-align: -1px; }
+.cal-ev-time svg.i  { margin-left: 4px; vertical-align: -1px; }
+.cal-chip svg.i     { margin-right: 3px; vertical-align: -1px; }
+
+.mini-del-sub,
+.mini-cancel-sub,
+.delete-btn { display: inline-flex; align-items: center; justify-content: center; }
