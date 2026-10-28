@@ -490,7 +490,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const task = {
             id,
             text:       parsed.text || transcript,
-            note:       '',
+            note:       !raw && parsed.condensed ? transcript.trim() : '',   // phrase dictée complète
             status:     'todo',
             tag:        parsed.tag       || 'Général',
             dueDate:    parsed.dueDate   || null,
@@ -582,6 +582,88 @@ document.addEventListener('DOMContentLoaded', () => {
         faîtes: 'faire', buvez: 'boire', courez: 'courir', ouvrez: 'ouvrir', suivez: 'suivre',
     };
 
+    // Espaces, ponctuation et mots de liaison orphelins en début / fin
+    function tidyTitle(s) {
+        s = s.replace(/\s+([,;:])/g, '$1').replace(/([,;:])(?:\s*[,;:])+/g, '$1').replace(/\s{2,}/g, ' ').trim();
+        for (let prev = ''; prev !== s;) {
+            prev = s;
+            s = s.replace(/^(?:[,;:]|et|à|a|le|la|pour|de)\s+/i, '')
+                 .replace(/(?:\s+(?:et|à|a|le|la|pour|de|du|vers|dès|avant|après|en|au))+$/i, '')
+                 .replace(/[\s,;:.]+$/, '')
+                 .trim();
+        }
+        return s;
+    }
+
+    // Verbes conjugués à la 1re personne (« que je prenne », « j'appelle ») → infinitif
+    const CONJUGATED = {
+        prenne: 'prendre', prends: 'prendre', fasse: 'faire', fais: 'faire', aille: 'aller', vais: 'aller',
+        mette: 'mettre', mets: 'mettre', dise: 'dire', dis: 'dire', lise: 'lire', lis: 'lire',
+        écrive: 'écrire', écris: 'écrire', sorte: 'sortir', sors: 'sortir', parte: 'partir', pars: 'partir',
+        voie: 'voir', vois: 'voir', revoie: 'revoir', rende: 'rendre', rends: 'rendre',
+        réponde: 'répondre', réponds: 'répondre', attende: 'attendre', attends: 'attendre',
+        vende: 'vendre', vends: 'vendre', descende: 'descendre', finisse: 'finir', finis: 'finir',
+        choisisse: 'choisir', remplisse: 'remplir', reçoive: 'recevoir', reçois: 'recevoir',
+        boive: 'boire', bois: 'boire', puisse: 'pouvoir', doive: 'devoir', sache: 'savoir',
+        appelle: 'appeler', rappelle: 'rappeler', jette: 'jeter', achète: 'acheter', lève: 'lever',
+        emmène: 'emmener', amène: 'amener', ramène: 'ramener', envoie: 'envoyer', renvoie: 'renvoyer',
+        paie: 'payer', nettoie: 'nettoyer', essaie: 'essayer', aie: 'avoir', sois: 'être',
+        passe: 'passer', range: 'ranger', mange: 'manger', change: 'changer',
+    };
+
+    function toInfinitive(word) {
+        const lw = word.toLowerCase();
+        if (CONJUGATED[lw]) return CONJUGATED[lw];
+        if (/(?:er|ir|re|oir)$/.test(lw)) return lw;           // déjà à l'infinitif
+        if (lw.length > 3 && /e$/.test(lw)) return lw + 'r';   // « range » → « ranger », « réserve » → « réserver »
+        return lw;
+    }
+
+    // Formules d'intention en tête de phrase ; « conj » = le verbe qui suit est conjugué
+    const INTENT_PREFIXES = [
+        { re: /^(?:euh+|heu+|bah|ben|bon|alors|donc|ok|du coup|en fait)[\s,]+/i },
+        { re: /^(?:il\s+)?(?:faut|faudrait|faudra)\s+(?:absolument\s+|vraiment\s+|surtout\s+)?que\s+(?:je\s+|j')/i, conj: true },
+        { re: /^(?:il\s+)?(?:faut|faudrait|faudra)\s+(?:absolument\s+|vraiment\s+|surtout\s+)?(?:qu'on\s+|que\s+l'on\s+)/i, conj: true },
+        { re: /^(?:il\s+)?(?:faut|faudrait|faudra)\s+(?:absolument\s+|vraiment\s+|surtout\s+)?/i },
+        { re: /^(?:il\s+me\s+faut|j'ai\s+besoin\s+d[e']\s*|je\s+(?:dois|devrais|vais|voudrais|veux|compte)\s+(?:absolument\s+|vraiment\s+)?)/i },
+        { re: /^(?:rappelle[- ]moi|rappelle[- ]toi|souviens[- ]toi|n'oublie\s+pas|oublie\s+pas|ne\s+pas\s+oublier|penser|pense)(?![a-zà-ÿ])\s*(?:de\s+|d'|à\s+)?/i },
+        { re: /^(?:je\s+|j')/i, conj: true },
+    ];
+    // Ce qui suit est une justification ou un détail : coupé du titre
+    const ASIDE = /(?:[,;]\s*|\s+)(?:parce\s+qu|car\s|puisqu|vu\s+qu|pour\s+que\s|histoire\s+de\s|comme\s+ça\s|sinon\s|si\s+possible)|[,;]\s*(?:il\s+)?(?:faut|faudra|faudrait|peut-être|genre|enfin|sinon|et\s+puis|mais|je\s|j'|on\s|ça\s|c'est\s)|\s+en\s+[a-zà-ÿ]+ant\b/i;
+    const TITLE_MAX_WORDS = 8;
+
+    function condenseTitle(s) {
+        let conj = false;
+        s = s.replace(/\b(?:euh+|heu+)\b[\s,]*/gi, '').replace(/\s+(?:absolument|vraiment)\b/gi, '');
+        for (let prev = ''; prev !== s;) {
+            prev = s;
+            for (const p of INTENT_PREFIXES) {
+                if (p.re.test(s)) { s = s.replace(p.re, ''); if (p.conj) conj = true; break; }
+            }
+        }
+
+        const aside = s.search(ASIDE);
+        if (aside > 0) s = s.slice(0, aside);
+        s = tidyTitle(s);
+
+        // Trop long : on coupe à la première articulation après le 3e mot, sinon net
+        let words = s.split(/\s+/);
+        if (words.length > TITLE_MAX_WORDS) {
+            // Virgule d'abord (elle sépare souvent le détail), puis les connecteurs
+            const head = words.slice(0, 3).join(' ').length;
+            for (const sep of [/,\s/, /\s(?:pour|afin|et|si|qui|que|avec)\s/i]) {
+                const cut = s.slice(head).search(sep);
+                if (cut >= 0) { s = s.slice(0, head + cut); break; }
+            }
+            words = tidyTitle(s).split(/\s+/);
+            s = tidyTitle(words.slice(0, TITLE_MAX_WORDS).join(' '));
+        }
+
+        if (conj) s = s.replace(/^[A-Za-zÀ-ÿ]+(?![-'’A-Za-zÀ-ÿ])/, toInfinitive);
+        return s;
+    }
+
     function parseVoiceTask(raw) {
         const out = {};
         let s = ` ${raw.trim().replace(/[.!?…]+$/, '')} `;
@@ -631,8 +713,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // Date
-        take(/\baprès[- ]demain\b/i, () => { out.dueDate = isoDate(addDays(2)); });
-        take(/\bdemain\b/i, () => { out.dueDate = isoDate(addDays(1)); });
+        const PART_OF_DAY = '(?:\\s+(?:soir|matin|après-midi|aprem))?';
+        take(new RegExp(`\\baprès[- ]demain${PART_OF_DAY}\\b`, 'i'), () => { out.dueDate = isoDate(addDays(2)); });
+        take(new RegExp(`\\bdemain${PART_OF_DAY}\\b`, 'i'), () => { out.dueDate = isoDate(addDays(1)); });
         take(/\b(?:aujourd'hui|aujourd’hui|ce soir|ce matin|cet après-midi)\b/i, () => { out.dueDate = isoDate(today); });
         take(/\b(?:ce\s+)?week-?end\b/i, () => { out.dueDate = isoDate(nextWeekday(6)); });
         take(/\b(?:la\s+)?semaine prochaine\b/i, () => { out.dueDate = isoDate(nextWeekday(1)); });
@@ -646,7 +729,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!m[3] && d < today) d.setFullYear(d.getFullYear() + 1);
             out.dueDate = isoDate(d);
         });
-        take(new RegExp(`\\b(?:ce\\s+|le\\s+)?(${WEEKDAYS.join('|')})(?:\\s+prochain)?\\b`, 'i'), m => {
+        take(new RegExp(`\\b(?:ce\\s+|le\\s+)?(${WEEKDAYS.join('|')})(?:\\s+prochain)?${PART_OF_DAY}\\b`, 'i'), m => {
             if (out.dueDate) return false;
             out.dueDate = isoDate(nextWeekday(WEEKDAYS.indexOf(m[1].toLowerCase())));
         });
@@ -657,15 +740,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         take(/(?:,?\s*c'est\s+|,\s*)?\b(?:urgente?|importante?)\b/i, () => { out.pinned = true; });
 
-        // Nettoyage : espaces, ponctuation et mots de liaison orphelins
-        s = s.replace(/\s+([,;:])/g, '$1').replace(/([,;:])(?:\s*[,;:])+/g, '$1').replace(/\s{2,}/g, ' ').trim();
-        for (let prev = ''; prev !== s;) {
-            prev = s;
-            s = s.replace(/^(?:[,;:]|et|à|a|le|la|pour|de)\s+/i, '')
-                 .replace(/(?:\s+(?:et|à|a|le|la|pour|de|du|vers|dès|avant|après))+$/i, '')
-                 .replace(/[\s,;:]+$/, '')
-                 .trim();
-        }
+        // Phrase parlée → titre court (la phrase complète ira dans la note)
+        s = tidyTitle(s);
+        const condensed = condenseTitle(s);
+        out.condensed = condensed.toLowerCase() !== s.toLowerCase();
+        s = condensed;
 
         // Whisper conjugue souvent à l'impératif (« Appelez ») : on revient à l'infinitif
         s = s.replace(/^[A-Za-zÀ-ÿ]+(?![-'’A-Za-zÀ-ÿ])/, w => {
